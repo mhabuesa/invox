@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Calculator Demo</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .d-none {
+            display: none;
+        }
+
+        input,
+        select {
+            margin: 5px 0;
+            padding: 5px;
+        }
+
+        .summary {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h2>Invoice System</h2>
+
+    <div id="rowContainer">
+        <div class="card">
+            <label>Product:</label>
+            <select class="product_id" style="width: 200px;">
+                <option value="">Select product</option>
+                <option value="1" data-unit_price="100">Product A - $100</option>
+                <option value="2" data-unit_price="200">Product B - $200</option>
+            </select>
+            <br>
+            <label>Qty:</label>
+            <input type="number" class="qty" value="1" min="1">
+            <br>
+            <label>Unit Price:</label>
+            <input type="number" class="unit_price" value="0">
+            <br>
+            <label>Tax (%):</label>
+            <input type="number" class="tex" value="0">
+            <br>
+            <label>Total: $<span class="total">0.00</span></label>
+            <br>
+            <button type="button" class="delRow d-none">Delete</button>
+        </div>
+    </div>
+
+    <button type="button" id="addRow">+ Add Row</button>
+
+    <hr>
+
+    <h3>Summary</h3>
+    <p>Subtotal: $<span id="subTotal">0.00</span></p>
+    <p>Total Tax: $<span id="totalTex">0.00</span></p>
+
+    <label>Discount:</label>
+    <input type="number" id="discount" value="0">
+    <select id="discount_type">
+        <option value="percentage">%</option>
+        <option value="flat">Flat</option>
+    </select>
+
+    <select id="discount_timing">
+        <option value="before_tax">Before Tax</option>
+        <option value="after_tax">After Tax</option>
+    </select>
+
+    <p>Discount Total: $<span id="discountTotal">0.00</span></p>
+    <p class="summary">Grand Total: $<span id="grandTotal">0.00</span></p>
+
+    <script>
+        $(document).ready(function () {
+            function calculateSummary() {
+                let subTotal = 0;
+                let totalTax = 0;
+
+                $('#rowContainer .card').each(function () {
+                    const qty = parseFloat($(this).find('.qty').val()) || 1;
+                    const unitPrice = parseFloat($(this).find('.unit_price').val()) || 0;
+                    const taxRate = parseFloat($(this).find('.tex').val()) || 0;
+
+                    const amount = qty * unitPrice;
+                    $(this).find('.total').text(amount.toFixed(2));
+                    subTotal += amount;
+                });
+
+                let discount = parseFloat($('#discount').val()) || 0;
+                let discountType = $('#discount_type').val();
+                let discountTiming = $('#discount_timing').val();
+                let discountAmount = 0;
+                let taxBase = subTotal;
+
+                // যদি discount before_tax হয়
+                if (discountTiming === 'before_tax') {
+                    if (discountType === 'percentage') {
+                        discountAmount = (subTotal * discount) / 100;
+                    } else {
+                        discountAmount = discount;
+                    }
+                    taxBase = subTotal - discountAmount;
+                }
+
+                // Tax calculate
+                $('#rowContainer .card').each(function () {
+                    const qty = parseFloat($(this).find('.qty').val()) || 1;
+                    const unitPrice = parseFloat($(this).find('.unit_price').val()) || 0;
+                    const taxRate = parseFloat($(this).find('.tex').val()) || 0;
+
+                    const amount = qty * unitPrice;
+                    const singleTaxBase = (discountTiming === 'before_tax') ? (amount - ((amount /
+                        subTotal) * discountAmount)) : amount;
+                    const taxAmount = singleTaxBase * taxRate / 100;
+                    totalTax += taxAmount;
+                });
+
+                // যদি after_tax হয়
+                if (discountTiming === 'after_tax') {
+                    if (discountType === 'percentage') {
+                        discountAmount = ((subTotal + totalTax) * discount) / 100;
+                    } else {
+                        discountAmount = discount;
+                    }
+                }
+
+                const grandTotal = (discountTiming === 'before_tax') ?
+                    (subTotal - discountAmount) + totalTax :
+                    (subTotal + totalTax - discountAmount);
+
+                $('#subTotal').text(subTotal.toFixed(2));
+                $('#totalTex').text(totalTax.toFixed(2));
+                $('#discountTotal').text(discountAmount.toFixed(2));
+                $('#grandTotal').text(grandTotal.toFixed(2));
+            }
+
+
+            function updateDeleteButtons() {
+                const cards = $('#rowContainer .card');
+                const showDelete = cards.length > 1;
+
+                $('.delRow').each(function () {
+                    $(this).toggleClass('d-none', !showDelete);
+                });
+            }
+
+            $(document).on('change', '.product_id', function () {
+                let unitPrice = $(this).find('option:selected').data('unit_price') ? ? 0;
+                let card = $(this).closest('.card');
+                card.find('.unit_price').val(unitPrice);
+                calculateSummary();
+            });
+
+            $(document).on('input change', '.qty, .unit_price, .tex', function () {
+                calculateSummary();
+            });
+
+            $(document).on('input', '.qty', function () {
+                if ($(this).val() < 1) $(this).val(1);
+                calculateSummary();
+            });
+
+            $('#addRow').on('click', function () {
+                let originalCard = $('#rowContainer .card:first');
+
+                originalCard.find('.product_id').select2('destroy');
+
+                let newCard = originalCard.clone();
+
+                newCard.find('.product_id').val('').removeAttr('data-select2-id')
+                    .removeClass('select2-hidden-accessible').next('.select2').remove();
+                newCard.find('.qty').val(1);
+                newCard.find('.unit_price').val(0);
+                newCard.find('.tex').val(0);
+                newCard.find('.total').text('0.00');
+
+                $('#rowContainer').append(newCard);
+                originalCard.find('.product_id').select2();
+                newCard.find('.product_id').select2();
+
+                updateDeleteButtons();
+                calculateSummary();
+            });
+
+            $(document).on('click', '.delRow', function () {
+                if ($('#rowContainer .card').length > 1) {
+                    $(this).closest('.card').remove();
+                    updateDeleteButtons();
+                    calculateSummary();
+                }
+            });
+
+            $(document).on('input change', '#discount, #discount_type, #discount_timing', function () {
+                calculateSummary();
+            });
+
+            // Init
+            $('.product_id').select2();
+            updateDeleteButtons();
+            calculateSummary();
+        });
+
+    </script>
+
+</body>
+
+</html>

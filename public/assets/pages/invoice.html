@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Invoice</title>
+  <style>
+    :root {
+      --primary-color: #f9c401;
+      --text-color: #333;
+      --border-color: #ddd;
+      --highlight-color: #fff8e1;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f8f8f8;
+    }
+
+    .invoice-container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .header, .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 1rem;
+    }
+
+    .invoice-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .info {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .info div {
+      flex: 1 1 45%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--highlight-color);
+    }
+
+    .summary {
+      margin-top: 1rem;
+      text-align: right;
+    }
+
+    .summary div {
+      margin-bottom: 0.5rem;
+    }
+
+    .summary strong {
+      background: var(--primary-color);
+      padding: 0.5rem 1rem;
+      color: #000;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+
+    .terms {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    @media (max-width: 600px) {
+      .info div {
+        flex: 1 1 100%;
+      }
+      .header, .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .invoice-title {
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-container">
+    <div class="header">
+      <div>
+        <h2 class="invoice-title">INVOICE</h2>
+      </div>
+      <div>
+        <strong>Invoice#:</strong> 52148<br>
+        <strong>Date:</strong> 01/02/2020
+      </div>
+    </div>
+
+    <div class="info">
+      <div>
+        <strong>Invoice to:</strong><br>
+        Dwayne Clark<br>
+        24 Dummy Street Area,<br>
+        Location, Lorem Ipsum<br>
+        570XX59X
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>Item Description</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Lorem Ipsum Dolor</td>
+          <td>$50.00</td>
+          <td>1</td>
+          <td>$50.00</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Pellentesque id neque ligula</td>
+          <td>$20.00</td>
+          <td>3</td>
+          <td>$60.00</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Interdum et malesuada fames</td>
+          <td>$10.00</td>
+          <td>2</td>
+          <td>$20.00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Vivamus volutpat faucibus</td>
+          <td>$90.00</td>
+          <td>1</td>
+          <td>$90.00</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="summary">
+      <div>Sub Total: $220.00</div>
+      <div>Tax: 0.00%</div>
+      <strong>Total: $220.00</strong>
+    </div>
+
+    <div class="terms">
+      <p><strong>Thank you</strong> for your business</p>
+      <p><strong>Terms & Conditions:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce dignissim sapien consectetur.</p>
+      <p><strong>Payment Info:</strong><br>
+        Account No: 123 456 9012<br>
+        A/C Name: Lorem Ipsum<br>
+        Bank Details: Add your bank details here
+      </p>
+    </div>
+
+    <div class="footer">
+      <div>
+        Phone | Address | Website
+      </div>
+      <div>
+        Authorised Sign
+      </div>
+    </div>
+  </div>
+</body>
+</html>
