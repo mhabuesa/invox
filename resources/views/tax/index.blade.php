@@ -48,8 +48,6 @@
                                                         onchange="updateTaxStatus(this)">
                                                     <span class="slider"></span>
                                                 </label>
-
-
                                             </td>
                                             <td>
                                                 <a href="#" class="btn btn-primary btn-sm" data-toggle="modal"

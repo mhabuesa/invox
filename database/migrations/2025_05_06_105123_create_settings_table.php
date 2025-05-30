@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('address');
             $table->string('logo')->nullable();
             $table->string('fav-icon')->nullable();
-            $table->string('currency')->nullable();
             $table->string('debug_mode')->nullable();
             $table->string('time_zone')->nullable();
             $table->string('app_url')->nullable();

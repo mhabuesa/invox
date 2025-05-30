@@ -32,9 +32,17 @@ Route::middleware('auth')->group(function () {
     });
     // Setting Controller Group
     Route::controller(SettingController::class)->group(function () {
+        // General Setting
         Route::get('/setting', 'setting')->name('setting.index');
         Route::post('/setting/update', 'setting_update')->name('setting.update');
+        Route::get('/setting/reload', 'setting_reload')->name('setting.reload');
+
+        // Currencies
         Route::get('/setting/currencies', 'currencies')->name('setting.currencies');
+        Route::post('/currency/store', 'currency_store')->name('currency.store');
+        Route::post('/currency/update/{currency}', 'currency_update')->name('currency.update');
+        Route::post('/currency/status/update/{id}', 'currency_status_update')->name('currency.status.update');
+        Route::delete('/currency/destroy/{currency}', 'currency_destroy')->name('currency.destroy');
     });
 
 

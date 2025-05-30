@@ -47,8 +47,8 @@
                                                 @endif
                                             </td>
                                             <td>{{ $invoice->invoice_date->format('m/d/Y') }}</td>
-                                            <td> {{ $invoice->total }}</td>
-                                            <td> <span class="badge badge-alt-danger">Due: {{ $invoice->total }}</span></td>
+                                            <td> {{ currency($invoice->total) }}</td>
+                                            <td> <span class="badge badge-alt-danger">Due: {{ currency($invoice->total - $invoice->due) }}</span></td>
                                             <td>
                                                 @if ($invoice->status == 1)
                                                     <span class="badge badge-success-alt">Paid</span>

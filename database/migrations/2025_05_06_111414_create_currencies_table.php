@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
             $table->string('country');
-            $table->string('currency');
-            $table->string('code');
-            $table->string('symbol');
+            $table->string('currency')->nullable();
+            $table->string('code')->nullable();
+            $table->string('symbol')->nullable();
+            $table->string('status')->default(0);
             $table->timestamps();
         });
     }

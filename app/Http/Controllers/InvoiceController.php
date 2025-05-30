@@ -29,7 +29,7 @@ class InvoiceController extends Controller
     public function create()
     {
         $clients = Client::all();
-        $invoice_number = 'INV-' . rand(1000000, 9999999);
+        $invoice_number =rand(100000, 999999);
         $products = Product::all();
         $taxes = Tax::all();
         return view('invoice.create', [
@@ -141,9 +141,12 @@ class InvoiceController extends Controller
      */
     public function show(string $id)
     {
-        $invoice = Invoice::findOrFail($id);
+        $invoice = Invoice::with('items')->find($id);
         $invoiceProducts = InvoiceItem::where('invoice_id', $id)->get();
-        return view('invoice.invoice_template.third');
+        return view('invoice.invoice',[
+            'invoice' => $invoice,
+            'invoiceProducts' => $invoiceProducts
+        ]);
     }
 
     /**

@@ -1,17 +1,17 @@
 @extends('layouts.app')
-@section('title', 'Settings')
+@section('title', 'General Settings')
 @push('header')
     <!-- Select2 -->
     <link rel="stylesheet" href="{{ asset('assets') }}/plugins/select2/css/select2.min.css">
     <link rel="stylesheet" href="{{ asset('assets') }}/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
 @endpush
 @section('content')
-@include('setting.menu')
+    @include('setting.menu')
 
     <section class="content">
         <div class="container-fluid">
             <!-- form start -->
-            <form method="POST" action="{{ route('setting.update') }}" enctype="multipart/form-data">
+            <form id="settingForm" action="{{ route('setting.update') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
@@ -55,8 +55,8 @@
                                     <h6>Website Header Logo</h6>
                                     <div class="mb-3">
                                         @if ($setting->logo)
-                                            <img id="view-website-logo" src="{{ asset($setting->logo) }}"
-                                                alt="Website Logo" height="100">
+                                            <img id="view-website-logo" src="{{ asset($setting->logo) }}" alt="Website Logo"
+                                                height="100">
                                         @else
                                             <img id="view-website-logo" src="https://placehold.co/500x500"
                                                 alt="Website Logo" height="100">
@@ -75,11 +75,11 @@
                                     <h6>Favicon</h6>
                                     <div class="mb-3">
                                         @if ($setting->favicon)
-                                        <img id="view-invoice-logo" src="{{ asset($setting->favicon) }}" alt="Invoice Logo"
-                                        height="100">
+                                            <img id="view-invoice-logo" src="{{ asset($setting->favicon) }}"
+                                                alt="Invoice Logo" height="100">
                                         @else
-                                        <img id="view-invoice-logo" src="https://placehold.co/500x500" alt="Invoice Logo"
-                                        height="100">
+                                            <img id="view-invoice-logo" src="https://placehold.co/500x500"
+                                                alt="Invoice Logo" height="100">
                                         @endif
                                     </div>
                                     <div class="custom-file">
@@ -106,8 +106,10 @@
                                 <div class="form-group col-md-4">
                                     <label for="debug">Debug Mode</label>
                                     <select class="form-control" name="debug_mode">
-                                        <option {{ $setting->debug_mode == 'true' ? 'selected' : '' }} value="true">True</option>
-                                        <option {{ $setting->debug_mode == 'false' ? 'selected' : '' }} value="false">False</option>
+                                        <option {{ $setting->debug_mode == 'true' ? 'selected' : '' }} value="true">True
+                                        </option>
+                                        <option {{ $setting->debug_mode == 'false' ? 'selected' : '' }} value="false">
+                                            False</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
@@ -121,10 +123,13 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Submit Button -->
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary px-5">Update</button>
+                            <button type="submit" id="update-btn" class="btn btn-primary">
+                                <span id="btn-text">Update</span>
+                                <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"
+                                    aria-hidden="true"></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -146,6 +151,89 @@
                     document.getElementById(targetId).src = e.target.result;
                 };
                 reader.readAsDataURL(this.files[0]);
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#yourFormId').on('submit', function() {
+                $('#updateBtn').attr('disabled', true); // Disable button
+                $('#btnLoader').removeClass('d-none'); // Show loader
+                $('#btnText').text('Updating...'); // Change text
+            });
+        });
+    </script>
+
+
+    <!-- Image preview and AJAX submit -->
+    <script>
+        $(document).ready(function() {
+            // Image preview
+            $('.image-input').on('change', function() {
+                const imageId = $(this).data('image-id');
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    $('#' + imageId).attr('src', e.target.result);
+                };
+
+                if (this.files && this.files[0]) {
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // AJAX submit
+            $('form').on('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                let form = $(this)[0];
+                let formData = new FormData(form);
+
+                // Clear previous messages
+                $('.alert').remove();
+
+                // Show spinner on submit button
+                $('#btn-text').text('Updating...');
+                $('#btn-spinner').removeClass('d-none');
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        // Delay a bit then reload settings route to reflect config
+                        setTimeout(() => {
+                            window.location.href = "{{ route('setting.reload') }}";
+                        }, 1000);
+                    },
+
+                    error: function(xhr) {
+                        // Hide spinner again
+                        $('#btn-text').text('Update');
+                        $('#btn-spinner').addClass('d-none');
+
+                        // Show error messages
+                        if (xhr.status === 422) {
+                            let errors = xhr.responseJSON.errors;
+                            let errorHtml = '<div class="alert alert-danger"><ul>';
+                            $.each(errors, function(key, value) {
+                                errorHtml += '<li>' + value[0] + '</li>';
+                            });
+                            errorHtml += '</ul></div>';
+                            $('form').prepend(errorHtml);
+                        } else {
+                            $('form').prepend(
+                                '<div class="alert alert-danger">Something went wrong!</div>'
+                            );
+                        }
+                    }
+                });
             });
         });
     </script>

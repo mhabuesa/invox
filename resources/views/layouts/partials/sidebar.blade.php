@@ -14,7 +14,7 @@
     <!-- Brand Logo -->
     <a href="{{ route('dashboard') }}" class="brand-link">
         @if ($setting->logo)
-            <img src="{{ $setting->logo }}" alt="Logo"
+            <img src="{{ asset($setting->logo) }}" alt="Logo"
                 class="brand-image img-circle elevation-3" style="opacity: .8">
         @else
             <img src="{{ asset('assets') }}/dist/img/AdminLTELogo.png" alt="AdminLTE Logo"
