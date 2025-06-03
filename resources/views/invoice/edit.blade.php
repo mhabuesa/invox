@@ -230,6 +230,23 @@
                         </div>
                         <!-- /.card -->
 
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title my-1">Note</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="form-group col-12">
+                                        <textarea class="form-control" name="note" id="note" rows="3"
+                                            placeholder="Write Some Note">{{ $invoiceData->note }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+
                         <button type="submit"
                             class="btn btn-info mt-5 w-25 d-flex mx-auto justify-content-center">Submit</button>
                     </form>

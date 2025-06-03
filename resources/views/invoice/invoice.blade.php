@@ -10,7 +10,7 @@
     @else
         <link rel="icon" href="{{ asset('assets') }}/dist/img/logo/favicon.png">
     @endif
-    <link rel="stylesheet" href="{{ asset('assets') }}/invoice/third.css">
+    <link rel="stylesheet" href="{{ asset('assets') }}/invoice/style.css">
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -33,12 +33,11 @@
                         <div class="tm_shape_bg tm_accent_bg tm_mobile_hide"></div>
                     </div>
                     <div class="tm_invoice_info tm_mb25">
-                        <div class="tm_card_note tm_mobile_hide"><b class="tm_primary_color">Payment Method: </b>Paypal,
-                            Western
-                            Union</div>
+                        <div class="tm_card_note tm_mobile_hide"></div>
                         <div class="tm_invoice_info_list tm_white_color">
-                            <p class="tm_invoice_number tm_m0">Invoice No: <b>#LL93784</b></p>
-                            <p class="tm_invoice_date tm_m0">Date: <b>01.07.2022</b></p>
+                            <p class="tm_invoice_number tm_m0">Invoice No: <b>#{{ $invoice->invoice_number }}</b></p>
+                            <p class="tm_invoice_date tm_m0">Date: <b>{{ $invoice->invoice_date->format('d-M-Y') }}</b>
+                            </p>
                         </div>
                         <div class="tm_invoice_seperator tm_accent_bg"></div>
                     </div>
@@ -46,20 +45,26 @@
                         <div class="tm_invoice_left">
                             <p class="tm_mb2"><b class="tm_primary_color">Invoice To:</b></p>
                             <p>
-                                Lowell H. Dominguez <br>
-                                84 Spilman Street, London <br>United Kingdom <br>
-                                <a href="/cdn-cgi/l/email-protection" class="__cf_email__"
-                                    data-cfemail="5b37342c3e37371b3c363a323775383436">[email&#160;protected]</a>
+                                {{ $setting->company_name }} <br>
+                                {{ $setting->address }} <br>
+                                <a href="{{ url('mailto:' . $setting->email) }}" class="__cf_email__"
+                                    data-cfemail="5b37342c3e37371b3c363a323775383436">{{ $setting->email }}</a> <br>
+                                {{ $setting->phone }}
                             </p>
                         </div>
                         <div class="tm_invoice_right tm_text_right">
                             <p class="tm_mb2"><b class="tm_primary_color">Pay To:</b></p>
                             <p>
-                                Laralink Ltd <br>
-                                86-90 Paul Street, London<br>
-                                England EC2A 4NE <br>
-                                <a href="/cdn-cgi/l/email-protection" class="__cf_email__"
-                                    data-cfemail="3753525a5877505a565e5b1954585a">[email&#160;protected]</a>
+                                {{ $invoice->client->name }} <br>
+                                @if ($invoice->client->address)
+                                    {{ $invoice->client->address }} <br>
+                                @endif
+                                @if ($invoice->client->email)
+                                    {{ $invoice->client->email }} <br>
+                                @endif
+                                @if ($invoice->client->phone)
+                                    {{ $invoice->client->phone }}
+                                @endif
                             </p>
                         </div>
                     </div>
@@ -82,49 +87,34 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="tm_width_3">1. Website Design</td>
-                                            <td class="tm_width_4">Six web page designs and
-                                                three times revision</td>
-                                            <td class="tm_width_2">$350</td>
-                                            <td class="tm_width_1">1</td>
-                                            <td class="tm_width_2 tm_text_right">$350</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="tm_width_3">2. Web Development</td>
-                                            <td class="tm_width_4">Convert pixel-perfect
-                                                frontend and make it dynamic</td>
-                                            <td class="tm_width_2">$600</td>
-                                            <td class="tm_width_1">1</td>
-                                            <td class="tm_width_2 tm_text_right">$600</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="tm_width_3">3. App Development</td>
-                                            <td class="tm_width_4">Android & Ios Application
-                                                Development</td>
-                                            <td class="tm_width_2">$200</td>
-                                            <td class="tm_width_1">2</td>
-                                            <td class="tm_width_2 tm_text_right">$400</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="tm_width_3">4. Digital Marketing</td>
-                                            <td class="tm_width_4">Facebook, Youtube and Google
-                                                Marketing</td>
-                                            <td class="tm_width_2">$100</td>
-                                            <td class="tm_width_1">3</td>
-                                            <td class="tm_width_2 tm_text_right">$300</td>
-                                        </tr>
+                                        @if ($invoice->items)
+                                            @foreach ($invoice->items as $key => $item)
+                                                <tr>
+                                                    <td class="tm_width_3">{{ $item->product->name }}</td>
+                                                    <td class="tm_width_4">{{ $item->product->description }}</td>
+                                                    <td class="tm_width_1">{{ $item->qty }}</td>
+                                                    <td class="tm_width_2">{{ currency($item->unit_price) }}</td>
+                                                    <td class="tm_width_2 tm_text_right">
+                                                        {{ currency($item->qty * $item->unit_price) }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="5">No items found</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <div class="tm_invoice_footer tm_border_top tm_mb15 tm_m0_md">
-                            <div class="tm_left_footer">
-                                <p class="tm_mb2"><b class="tm_primary_color">Payment
-                                        info:</b></p>
-                                <p class="tm_m0">Credit Card - 236***********928 <br>Amount:
-                                    $1732</p>
-                            </div>
+                        <div
+                            class="tm_invoice_footer tm_border_top tm_mb15 tm_m0_md {{ $invoice->note ? '' : 'flex_end' }}">
+                            @if ($invoice->note)
+                                <div class="tm_left_footer">
+                                    <p class="tm_mb2"><b class="tm_primary_color">Note:</b></p>
+                                    <p class="tm_m0">{{ $invoice->note }}</p>
+                                </div>
+                            @endif
                             <div class="tm_right_footer">
                                 <table class="tm_mb15">
                                     <tbody>
@@ -132,45 +122,51 @@
                                             <td class="tm_width_3 tm_primary_color tm_bold">
                                                 Subtoal</td>
                                             <td class="tm_width_3 tm_primary_color tm_bold tm_text_right">
-                                                $1650</td>
+                                                {{ currency($invoice->subtotal) }}</td>
                                         </tr>
                                         <tr class="tm_gray_bg">
-                                            <td class="tm_width_3 tm_primary_color">Tax <span
-                                                    class="tm_ternary_color">(5%)</span></td>
+                                            <td class="tm_width_3 tm_primary_color">Tax</td>
                                             <td class="tm_width_3 tm_primary_color tm_text_right">
-                                                +$82</td>
+                                                +{{ currency($invoice->tax) }}</td>
+                                        </tr>
+                                        <tr class="tm_gray_bg">
+                                            <td class="tm_width_3 tm_primary_color">Discount</td>
+                                            <td class="tm_width_3 tm_primary_color tm_text_right">
+                                                -{{ currency($invoice->discount_amount) }}</td>
                                         </tr>
                                         <tr class="tm_accent_bg">
                                             <td class="tm_width_3 tm_border_top_0 tm_bold tm_f16 tm_white_color">
                                                 Grand Total </td>
                                             <td
                                                 class="tm_width_3 tm_border_top_0 tm_bold tm_f16 tm_white_color tm_text_right">
-                                                $1732</td>
+                                                {{ currency($invoice->total) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <div class="tm_invoice_footer tm_type1">
-                            <div class="tm_left_footer"></div>
-                            <div class="tm_right_footer">
-                                <div class="tm_sign tm_text_center">
-                                    <img src="assets/img/sign.svg" alt="Sign">
-                                    <p class="tm_m0 tm_ternary_color">Jhon Donate</p>
-                                    <p class="tm_m0 tm_f16 tm_primary_color">Accounts Manager
-                                    </p>
+                        @if ($invoice_setting->authorized_status != 0)
+                            <div class="tm_invoice_footer tm_type1">
+                                <div class="tm_left_footer"></div>
+                                <div class="tm_right_footer">
+                                    <div class="tm_sign tm_text_center">
+                                        <img src="{{asset($invoice_setting->signature)}}" alt="Sign">
+                                        <p class="tm_m0 tm_ternary_color">{{ $invoice_setting->name }}</p>
+                                        <p class="tm_m0 tm_f16 tm_primary_color">{{ $invoice_setting->designation }}</p>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
-                    <div class="tm_note tm_text_center tm_font_style_normal">
-                        <hr class="tm_mb15">
-                        <p class="tm_mb2"><b class="tm_primary_color">Terms & Conditions:</b>
-                        </p>
-                        <p class="tm_m0">All claims relating to quantity or shipping errors
-                            shall be waived by Buyer unless made in writing to <br>Seller within
-                            thirty (30) days after delivery of goods to the address stated.</p>
-                    </div><!-- .tm_note -->
+                    @if ($invoice_setting->terms_status != 0)
+                        <div class="tm_note tm_text_center tm_font_style_normal">
+                            <hr class="tm_mb15">
+                            <p class="tm_mb2"><b class="tm_primary_color">Terms & Conditions:</b>
+                            </p>
+                            <p class="tm_m0">{{ $invoice_setting->terms }}</p>
+                        </div><!-- .tm_note -->
+                    @endif
                 </div>
             </div>
             <div class="tm_invoice_btns tm_hide_print">

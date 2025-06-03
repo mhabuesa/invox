@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('tax')->nullable();
             $table->string('subtotal');
             $table->string('total');
+            $table->longText('note')->nullable();
             $table->string('paid')->default('0');
             $table->string('status')->default('0');
             $table->timestamps();

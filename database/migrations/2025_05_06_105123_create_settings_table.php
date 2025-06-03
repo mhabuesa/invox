@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('debug_mode')->nullable();
             $table->string('time_zone')->nullable();
             $table->string('app_url')->nullable();
+            $table->string('email_username')->nullable();
+            $table->string('app_password')->nullable();
             $table->timestamps();
         });
     }

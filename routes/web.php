@@ -43,6 +43,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/currency/update/{currency}', 'currency_update')->name('currency.update');
         Route::post('/currency/status/update/{id}', 'currency_status_update')->name('currency.status.update');
         Route::delete('/currency/destroy/{currency}', 'currency_destroy')->name('currency.destroy');
+
+        //Invoice
+        Route::get('/setting/invoice', 'invoice_setting')->name('setting.invoice');
+        Route::post('/setting/invoice/update', 'invoice_setting_update')->name('setting.invoice.update');
+        Route::delete('/remove/signature', 'remove_signature')->name('remove.signature');
+
     });
 
 

@@ -281,7 +281,7 @@
             });
         }
 
-        // Delete Tax Confirmation alart
+        // Delete currency Confirmation alart
         function deleteCurrency(button) {
             const id = $(button).data('id');
             Swal.fire({

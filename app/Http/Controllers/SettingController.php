@@ -8,6 +8,7 @@ use App\Models\TimeZone;
 use Illuminate\Http\Request;
 use App\Traits\ImageSaveTrait;
 use App\Helpers\SettingsHelper;
+use App\Models\InvoiceSetting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Artisan;
 
@@ -71,14 +72,18 @@ class SettingController extends Controller
             $setting->app_url = $request->app_url;
             $setting->debug_mode = $request->debug_mode;
             $setting->time_zone = $request->time_zone;
+            $setting->email_userName = $request->email_userName;
+            $setting->app_password = $request->app_password;
             $setting->save();   // Save the updated setting
 
             // Call the helper to update the app settings in .env and config files
             SettingsHelper::setEnvironmentValue('APP_NAME', $request->company_name);
             SettingsHelper::setEnvironmentValue('APP_DEBUG', $request->debug_mode);
             SettingsHelper::setEnvironmentValue('APP_URL', $request->app_url);
+            SettingsHelper::setEnvironmentValue('MAIL_USERNAME', $request->email_userName);
+            SettingsHelper::setEnvironmentValue('MAIL_PASSWORD', $request->app_password);
 
-            return response()->json(['status' => 'success', 'message' => 'Settings updated successfully']);
+            return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
@@ -87,7 +92,6 @@ class SettingController extends Controller
     public function setting_reload()
     {
         Artisan::call('config:clear');
-        Artisan::call('cache:clear');
         return redirect()->route('setting.index')->with('success', 'Settings Updated Successfully');
     }
 
@@ -177,5 +181,65 @@ class SettingController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Currency Deleted Successfully'], 200);
+    }
+    public function invoice_setting()
+    {
+        return view('setting.invoice_setting', [
+            'info' => InvoiceSetting::first(),
+        ]);
+    }
+    public function invoice_setting_update(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'designation' => 'required',
+        ]);
+
+        $previous_info = InvoiceSetting::first();
+
+        $authorized_status = $request->authorized_status ? 1 : 0;
+        $terms_status = $request->terms_status ? 1 : 0;
+
+
+        if ($request->hasFile('signature')) {
+            if ($previous_info->signature != null) {
+                // Delete old signature if exists
+                $this->deleteImage('invoice_setting', $previous_info->signature);
+            }
+            $signature_name = $this->saveImage('invoice_setting', $request->file('signature'));
+        }
+
+        InvoiceSetting::updateOrCreate(
+            ['id' => 1], // where condition
+            [
+                'name' => $request->name,
+                'designation' => $request->designation,
+                'signature' => $signature_name ?? $previous_info->signature ?? null,
+                'authorized_status' => $authorized_status,
+                'terms' => $request->terms,
+                'terms_status' => $terms_status,
+            ]
+        );
+        return redirect()->route('setting.invoice')->with('success', 'Invoice Setting Updated Successfully');
+    }
+
+    public function remove_signature()
+    {
+        // Remove signature logic
+        $invoiceSetting = InvoiceSetting::first();
+        if ($invoiceSetting && $invoiceSetting->signature) {
+            $this->deleteImage('invoice_setting', $invoiceSetting->signature);
+            $invoiceSetting->signature = null;
+            $invoiceSetting->save();
+            return response()->json([
+                'success' => true,
+                'message' => 'Signature removed successfully.'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No signature found to remove.'
+            ], 404);
+        }
     }
 }

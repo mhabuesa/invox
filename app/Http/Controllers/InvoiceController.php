@@ -6,9 +6,12 @@ use App\Models\Tax;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Mail\InvoiceMail;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
+use App\Models\InvoiceSetting;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class InvoiceController extends Controller
 {
@@ -106,6 +109,7 @@ class InvoiceController extends Controller
             'subtotal' => $subtotal,
             'tax' => $total_tax,
             'total' => $total,
+            'note' => $request->note ?? null,
         ]);
 
         // Loop through each product and save as a invoice item
@@ -132,6 +136,9 @@ class InvoiceController extends Controller
             ]);
         }
 
+        Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
+
+
         // Redirect back with success message
         return redirect()->route('invoice.index')->with('success', 'Invoice created successfully!');
     }
@@ -142,10 +149,13 @@ class InvoiceController extends Controller
     public function show(string $id)
     {
         $invoice = Invoice::with('items')->find($id);
-        $invoiceProducts = InvoiceItem::where('invoice_id', $id)->get();
+        $invoice_setting = InvoiceSetting::first();
+        if (!$invoice) {
+            abort(404, 'Invoice not found');
+        }
         return view('invoice.invoice',[
             'invoice' => $invoice,
-            'invoiceProducts' => $invoiceProducts
+            'invoice_setting' => $invoice_setting
         ]);
     }
 
@@ -238,6 +248,7 @@ class InvoiceController extends Controller
             'subtotal' => $subtotal,
             'tax' => $total_tax,
             'total' => $total,
+            'note' => $request->note ?? null,
         ]);
 
 

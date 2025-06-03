@@ -15,6 +15,9 @@
                         <li class="{{ Route::is('setting.currencies') ? 'active' : '' }}">
                             <a href="{{ route('setting.currencies') }}">Currencies</a>
                         </li>
+                        <li class="{{ Route::is('setting.invoice') ? 'active' : '' }}">
+                            <a href="{{ route('setting.invoice') }}">Invoice</a>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -123,6 +123,28 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Email Configuration -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h4 class="mb-0">Email Configuration</h4>
+                            </div>
+                            <div class="card-body row">
+                                <div class="form-group col-lg-6">
+                                    <label class="form-label mb-0" for="email_userName">Email UserName</label>
+                                    <small class="form-text text-muted mb-2 mt-0">Use your Gmail address</small>
+                                    <input type="text" name="email_userName" class="form-control" id="email_userName"
+                                        placeholder="Enter your Email UserName" value="{{ $setting->email_username }}">
+
+                                </div>
+                                <div class="form-group col-lg-6">
+                                    <label class="form-label mb-0" for="app_password">App Password</label>
+                                    <small class="form-text text-muted mb-2 mt-0">Use your Gmail app password</small>
+                                    <input type="text" name="app_password" class="form-control" id="app_password"
+                                        placeholder="Enter your Email App Password" value="{{ $setting->app_password }}">
+                                </div>
+                            </div>
+                        </div>
                         <!-- Submit Button -->
                         <div class="text-center">
                             <button type="submit" id="update-btn" class="btn btn-primary">
