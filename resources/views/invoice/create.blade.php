@@ -171,12 +171,12 @@
                                     <div class="form-group col-12 col-md-6 col-lg-6">
                                         <div class="row">
                                             <div class="col-12 col-md-4 col-lg-4">
-                                                <label for="discount_timing">Discount Apply Timing</label>
+                                                <label for="dis_timing">Discount Apply Timing</label>
                                                 <div class="input-group mb-3">
                                                     <select name="discount_timing" id="discount_timing"
                                                         class="form-control">
-                                                        <option value="before_tax">Applied Before Tax</option>
                                                         <option value="after_tax">Applied After Tax</option>
+                                                        <option value="before_tax">Applied Before Tax</option>
                                                     </select>
                                                 </div>
                                             </div>

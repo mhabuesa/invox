@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Artisan;
 
 class SettingController extends Controller
 {
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'setting',
+        ]);
+    }
     // Include the ImageSaveTrait to gain access to image saving methods
     use ImageSaveTrait;
 
@@ -91,7 +98,6 @@ class SettingController extends Controller
 
     public function setting_reload()
     {
-        Artisan::call('config:clear');
         return redirect()->route('setting.index')->with('success', 'Settings Updated Successfully');
     }
 

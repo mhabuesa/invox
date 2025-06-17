@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TaxController;
 use App\Http\Controllers\UserController;
@@ -22,6 +24,12 @@ Route::middleware('auth')->group(function () {
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'home');
         Route::get('/dashboard', 'dashboard')->name('dashboard');
+    });
+
+     // Common Controller Group
+    Route::controller(CommonController::class)->group(function () {
+        Route::get('/dbBackup', 'dbBackup')->name('dbBackup');
+        Route::get('/activityLog', 'activityLog')->name('activityLog');
     });
 
     // Profile Controller Group
@@ -48,7 +56,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/setting/invoice', 'invoice_setting')->name('setting.invoice');
         Route::post('/setting/invoice/update', 'invoice_setting_update')->name('setting.invoice.update');
         Route::delete('/remove/signature', 'remove_signature')->name('remove.signature');
+    });
 
+    // Role Management Controller
+    Route::controller(RoleController::class)->group(function () {
+        Route::get('/role', 'index')->name('role.index');
+        Route::post('/permission/store', 'permission_store')->name('permission.store');
+        Route::post('/create/role', 'create_role')->name('role.create');
+        Route::get('/role/edit/{id}', 'role_edit')->name('role.edit');
+        Route::post('/role/update/{id}', 'role_update')->name('role.update');
+        Route::get('/role/delete/{id}', 'role_delete')->name('role.delete');
+        Route::post('/role/assign', 'role_assign')->name('role.assign');
+        Route::get('/user/role/delete/{id}', 'user_role_delete')->name('user.role.delete');
     });
 
 
@@ -60,10 +79,10 @@ Route::middleware('auth')->group(function () {
     });
     Route::controller(QuoteController::class)->name('quote.')->prefix('quote')->group(function () {
         Route::post('/addClientAjax', 'addClientAjax')->name('addClientAjax');
+        Route::get('/convertToInvoice/{id}', 'convertToInvoice')->name('convertToInvoice');
     });
     Route::controller(InvoiceController::class)->name('invoice.')->prefix('invoice')->group(function () {
         Route::post('/addClientAjax', 'addClientAjax')->name('addClientAjax');
-        // Route::get('/', 'addClientAjax')->name('addClientAjax');
     });
     Route::controller(TaxController::class)->name('tax.')->prefix('tax')->group(function () {
         Route::post('/status/update/{id}', 'status_update')->name('status.update');
@@ -71,13 +90,13 @@ Route::middleware('auth')->group(function () {
 
 
     // Resource Controller
-    Route::resource('/user', UserController::class);
-    Route::resource('/client', ClientController::class);
-    Route::resource('/category', CategoryController::class);
-    Route::resource('/product', ProductController::class);
     Route::resource('/quote', QuoteController::class);
-    Route::resource('/tax', TaxController::class);
     Route::resource('/invoice', InvoiceController::class);
+    Route::resource('/tax', TaxController::class);
+    Route::resource('/product', ProductController::class);
+    Route::resource('/category', CategoryController::class);
+    Route::resource('/client', ClientController::class);
+    Route::resource('/user', UserController::class);
 
 });
 

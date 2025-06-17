@@ -10,10 +10,12 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "imliam/laravel-env-set-command": "^2.0",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^2.10.1",
+        "spatie/laravel-permission": "^6.19"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",
@@ -35,7 +37,9 @@
         },
         "files": [
             "app/Helpers/SettingsHelper.php",
-            "app/Helpers/Currency.php"
+            "app/Helpers/Currency.php",
+            "app/Helpers/FormatPermission.php",
+            "app/Helpers/UserLog.php"
         ]
     },
     "autoload-dev": {

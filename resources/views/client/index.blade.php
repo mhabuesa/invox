@@ -17,8 +17,11 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title  ">Client List</h3>
-                            <a href="{{ route('client.create') }}" class="btn btn-primary btn-sm float-right"> <i
+                            @can('client_add')
+                                <a href="{{ route('client.create') }}" class="btn btn-primary btn-sm float-right"> <i
                                     class="fas fa-plus"></i> Add New Client</a>
+
+                            @endcan
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
@@ -31,7 +34,9 @@
                                         <th>Email</th>
                                         <th>Phone</th>
                                         <th>Address</th>
-                                        <th>Action</th>
+                                        @if (Auth::user()->can('client_edit') || Auth::user()->can('client_delete'))
+                                            <th>Action</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -39,19 +44,25 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $client->name }}</td>
-                                            <td>{{ 'Invoice' }}</td>
+                                            <td>{{ $client->invoices->count() }}</td>
                                             <td> {{ $client->email }}</td>
                                             <td> {{ $client->phone }}</td>
                                             <td> {{ $client->address }}</td>
-                                            <td>
-                                                <a href="{{ route('client.edit', $client->id) }}"
-                                                    class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
-                                                <button type="button"
-                                                    class="btn btn-sm  btn-danger js-bs-tooltip-enabled mx-2"
-                                                    onclick="deleteClient(this)" data-id="{{ $client->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
+                                            @if (Auth::user()->can('client_edit') || Auth::user()->can('client_delete'))
+                                                <td>
+                                                    @can('client_edit')
+                                                        <a href="{{ route('client.edit', $client->id) }}"
+                                                            class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                                    @endcan
+                                                    @can('client_delete')
+                                                        <button type="button"
+                                                            class="btn btn-sm  btn-danger js-bs-tooltip-enabled mx-2"
+                                                            onclick="deleteClient(this)" data-id="{{ $client->id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
+                                            @endif
                                         </tr>
                                     @endforeach
 

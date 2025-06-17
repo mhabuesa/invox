@@ -11,6 +11,16 @@ use Illuminate\Support\Facades\Redirect;
 
 class UserController extends Controller
 {
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'user_access',
+            'create'  => 'user_add',
+            'edit'    => 'user_edit',
+            'destroy' => 'user_delete',
+        ]);
+    }
     use ImageSaveTrait;
     /**
      * Display a listing of the resource.

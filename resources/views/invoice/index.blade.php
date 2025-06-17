@@ -17,8 +17,10 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Invoice List</h3>
-                            <a href="{{ route('invoice.create') }}" class="btn btn-primary btn-sm float-right"> <i
-                                    class="fas fa-plus"></i> Add Invoice</a>
+                            @can('invoice_add')
+                                <a href="{{ route('invoice.create') }}" class="btn btn-primary btn-sm float-right"> <i
+                                        class="fas fa-plus"></i> Add Invoice</a>
+                            @endcan
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
@@ -29,7 +31,6 @@
                                         <th>Client</th>
                                         <th>Invoice Date</th>
                                         <th>Amount</th>
-                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -39,7 +40,8 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>
                                                 @if ($invoice->client)
-                                                    <span>{{ $invoice->client->name }} &nbsp; <a href="#" class="badge badge-primary-alt">{{ $invoice->invoice_number }}</a></span>
+                                                    <span>{{ $invoice->client->name }} &nbsp; <a href="#"
+                                                            class="badge badge-primary-alt">{{ $invoice->invoice_number }}</a></span>
                                                     <span class="text-muted d-block">{{ $invoice->client->email }}</span>
                                                 @else
                                                     <span class="text-danger">Client Not Found</span>
@@ -48,13 +50,6 @@
                                             <td>{{ $invoice->invoice_date->format('m/d/Y') }}</td>
                                             <td> <strong> {{ currency($invoice->total) }}</strong></td>
                                             <td>
-                                                @if ($invoice->status == 1)
-                                                    <span class="badge badge-success-alt">Paid</span>
-                                                @else
-                                                    <span class="badge badge-danger-alt">Unpaid</span>
-                                                @endif
-                                            </td>
-                                            <td>
                                                 <div class="btn-group">
                                                     <button type="button"
                                                         class="btn btn-default dropdown-toggle dropdown-icon"
@@ -62,15 +57,28 @@
                                                         <span class="sr-only">Toggle Dropdown</span>
                                                     </button>
                                                     <div class="dropdown-menu" role="menu" style="">
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('invoice.edit', $invoice->id) }}"><i
-                                                                class="fas fa-edit fa-sm"></i> Edit</a>
-                                                        <a class="dropdown-item text-danger" href="#"
-                                                            onclick="deleteInvoice(this)" data-id="{{ $invoice->id }}"> <i
-                                                                class="fas fa-trash fa-sm"></i> Delete</a>
-                                                        <div class="dropdown-divider"></div>
-                                                        <a class="dropdown-item" href="{{ route('invoice.show', $invoice->id)}}"> <i
-                                                                class="fas fa-link fa-sm"></i> Invoice URL</a>
+                                                        @can('invoice_edit')
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('invoice.edit', $invoice->id) }}"><i
+                                                                    class="fas fa-edit fa-sm"></i> Edit</a>
+                                                        @endcan
+                                                        @can('invoice_delete')
+                                                            <a class="dropdown-item text-danger" href="#"
+                                                                onclick="deleteInvoice(this)" data-id="{{ $invoice->id }}"> <i
+                                                                    class="fas fa-trash fa-sm"></i> Delete</a>
+                                                            <div class="dropdown-divider"></div>
+                                                        @endcan
+                                                        <div class="dropdown-item d-flex justify-content-between">
+                                                            <span>
+                                                                <a target="_blank"
+                                                                    href="{{ route('invoice.show', $invoice->invoice_number) }}">
+                                                                    <i class="fas fa-link fa-sm"></i> Invoice
+                                                                </a>
+                                                            </span>
+                                                            <span class="cursor-pointer"
+                                                                onclick="copyToClipboard('{{ route('invoice.show', $invoice->invoice_number) }}')"><i
+                                                                    class="fas fa-copy"></i></span></a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -161,6 +169,18 @@
 
                 }
             });
+        }
+    </script>
+
+    <script>
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Copied to clipboard', 'success');
         }
     </script>
 @endpush

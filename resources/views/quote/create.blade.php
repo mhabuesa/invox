@@ -61,7 +61,7 @@
                                             <label for="quote_number">Quote # <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" id="quote_number"
                                                 placeholder="Enter Quote Number" name="quote_number"
-                                                value="{{ old('quote_number') ?? $quote_number }}" required>
+                                                value="{{ old('quote_number') ?? $quote_number }}" required readonly>
                                         </div>
                                         @error('quote_number')
                                             <div class="text-danger mt-1">{{ $message }}</div>

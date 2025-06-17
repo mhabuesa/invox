@@ -17,8 +17,10 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Taxes List</h3>
-                            <a href="#" class="btn btn-primary btn-sm float-right" data-toggle="modal"
-                                data-target="#addTax"> <i class="fas fa-plus"></i> Add New Taxes</a>
+                            @can('tax_add')
+                                <a href="#" class="btn btn-primary btn-sm float-right" data-toggle="modal"
+                                    data-target="#addTax"> <i class="fas fa-plus"></i> Add New Taxes</a>
+                            @endcan
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
@@ -29,7 +31,13 @@
                                         <th>Name</th>
                                         <th>Value</th>
                                         <th>Default</th>
-                                        <th>Action</th>
+                                        @php
+                                            $user = Auth::user();
+                                        @endphp
+
+                                        @if ($user->can('tax_edit') || $user->can('tax_delete'))
+                                            <th>Action</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -49,16 +57,27 @@
                                                     <span class="slider"></span>
                                                 </label>
                                             </td>
-                                            <td>
-                                                <a href="#" class="btn btn-primary btn-sm" data-toggle="modal"
-                                                    data-target="#taxEdit-{{ $tax->id }}"><i
-                                                        class="fas fa-edit"></i></a>
-                                                <button type="button"
-                                                    class="btn btn-sm  btn-danger js-bs-tooltip-enabled mx-2"
-                                                    onclick="deleteTax(this)" data-id="{{ $tax->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
+                                            @php
+                                                $user = Auth::user();
+                                            @endphp
+
+                                            @if ($user->can('tax_edit') || $user->can('tax_delete'))
+                                                <td>
+                                                    @can('tax_edit')
+                                                        <a href="#" class="btn btn-primary btn-sm" data-toggle="modal"
+                                                            data-target="#taxEdit-{{ $tax->id }}"><i
+                                                                class="fas fa-edit"></i></a>
+                                                    @endcan
+
+                                                    @can('tax_delete')
+                                                        <button type="button"
+                                                            class="btn btn-sm  btn-danger js-bs-tooltip-enabled mx-2"
+                                                            onclick="deleteTax(this)" data-id="{{ $tax->id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
+                                            @endif
                                         </tr>
 
                                         <!-- Modal for Tax Edit -->

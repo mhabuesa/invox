@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'create'  => 'product_add',
+            'edit'    => 'product_edit',
+            'destroy' => 'product_delete',
+        ]);
+    }
     use ImageSaveTrait;
     /**
      * Display a listing of the resource.
@@ -28,7 +37,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $code = 'PRD'. rand(1000, 9999);
+        $code = 'PRD' . rand(1000, 9999);
         return view('product.create', [
             'categories' => $categories,
             'code' => $code
@@ -62,8 +71,10 @@ class ProductController extends Controller
             'description' => $request->description
         ]);
 
-        return redirect()->route('product.index')->with('success', 'Product Created Successfully');
+        // Log the action
+        userLog('Product Create', 'Created a New Product - ' . $request->name);
 
+        return redirect()->route('product.index')->with('success', 'Product Created Successfully');
     }
 
     /**
@@ -117,6 +128,9 @@ class ProductController extends Controller
             'description' => $request->description
         ]);
 
+        // Log the action
+        userLog('Product Update', 'Updated a Product - ' . $request->name);
+
         return redirect()->route('product.index')->with('success', 'Product Updated Successfully');
     }
 
@@ -126,6 +140,9 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $product = Product::findOrFail($id);
+
+        // Log the action
+        userLog('Product Delete', 'Deleted a Product - ' . $product->name);
 
         try {
             // Delete product
@@ -138,7 +155,8 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Category Deleted Successfully'], 200);
     }
 
-    public function addCategoryAjax(Request $request){
+    public function addCategoryAjax(Request $request)
+    {
         $request->validate([
             'category_name' => 'required|string|max:255|unique:categories,name',
         ]);

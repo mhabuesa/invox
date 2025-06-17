@@ -9,6 +9,16 @@ use Illuminate\Support\Facades\Redirect;
 
 class TaxController extends Controller
 {
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'tax_access',
+            'create'  => 'tax_add',
+            'edit'    => 'tax_edit',
+            'destroy' => 'tax_delete',
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -42,6 +52,8 @@ class TaxController extends Controller
             'name' => $request->name,
             'value' => $request->value,
         ]);
+        // Log the action
+        userLog('Tax Create', 'Created a new tax: ' . $request->name);
 
         return Redirect::route('tax.index')->with('success', 'Tax Created Successfully');
     }
@@ -84,6 +96,9 @@ class TaxController extends Controller
         $tax->value = $request->value;
         $tax->save();
 
+        // Log the action
+        userLog('Tax Update', 'Updated tax: ' . $request->name);
+
         return Redirect::route('tax.index')->with('success', 'Tax Updated Successfully');
     }
 
@@ -93,6 +108,8 @@ class TaxController extends Controller
     public function destroy(string $id)
     {
         $tax = Tax::findOrFail($id);
+        // Log the action
+        userLog('Tax Delete', 'Deletes a Tax - ' . $tax->name);
 
         try {
             // Delete Tax

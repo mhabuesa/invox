@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Redirect;
 
 class CategoryController extends Controller
 {
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'category_access',
+            'create'  => 'category_add',
+            'edit'    => 'category_edit',
+            'destroy' => 'category_delete',
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -41,7 +51,10 @@ class CategoryController extends Controller
         Category::create([
             'name' => $request->name,
         ]);
+        // Log the action
+        userLog('Category Create', 'Created a New Category - ' . $request->name);
 
+        // Redirect with success message
         return Redirect::route('category.index')->with('success', 'Category Created Successfully');
     }
 
@@ -81,6 +94,9 @@ class CategoryController extends Controller
         $category->name = $request->category_name;
         $category->save();
 
+        // Log the action
+        userLog('Category Update', 'Updated a Category - ' . $request->category_name);
+        // Redirect with success message
         return Redirect::route('category.index')->with('success', 'Category Updated Successfully');
     }
 
@@ -96,6 +112,9 @@ class CategoryController extends Controller
 
         Product::where('category_id', $id)->update(['category_id' => $uncategorized->id]);
         $category = Category::findOrFail($id);
+        // Log the action
+        userLog('Category Destroy', 'Destroyed a Category - ' . $category->name);
+
         try {
             $category->delete();
         } catch (\Exception $e) {

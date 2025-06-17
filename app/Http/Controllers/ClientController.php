@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\Redirect;
 
 class ClientController extends Controller
 {
+
+
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'client_access',
+            'create'  => 'client_add',
+            'edit'    => 'client_edit',
+            'destroy' => 'client_delete',
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -35,7 +47,7 @@ class ClientController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
-            'email' => 'nullable|email|unique:clients,email',
+            'email' => 'required|email|unique:clients,email',
         ]);
 
         Client::create([
@@ -44,6 +56,9 @@ class ClientController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
+
+        // Log the action
+        userLog('Client Create', 'Created a New Client - ' . $request->name);
 
         return Redirect::route('client.index')->with('success', 'Client Created Successfully');
     }
@@ -85,6 +100,9 @@ class ClientController extends Controller
             'address' => $request->address,
         ]);
 
+        // Log the action
+        userLog('Client Update', 'Updated a Client - ' . $request->name);
+
         return Redirect::route('client.index')->with('success', 'Client Updated Successfully');
     }
 
@@ -94,6 +112,9 @@ class ClientController extends Controller
     public function destroy(string $id)
     {
         $client = Client::findOrFail($id);
+
+        // Log the action
+        userLog('Client Destroy', 'Destroyed a Client - ' . $client->name);
 
         try {
             // Delete client

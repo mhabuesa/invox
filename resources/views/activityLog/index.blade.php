@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Users')
+@section('title', 'Activity Log')
 @push('header')
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('assets') }}/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
@@ -11,66 +11,41 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
+            <div class="row d-flex justify-content-center">
+                <div class="col-lg-8">
 
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title  ">Users List</h3>
-                            @can('user_add')
-                                <a href="{{ route('user.create') }}" class="btn btn-primary btn-sm float-right"> <i
-                                        class="fas fa-plus"></i> Add User</a>
-                            @endcan
+                            <h3 class="card-title">User Activity Log</h3>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
-                            <table id="userTable" class="table table-bordered table-striped userTable">
+                            <table id="categoryTable" class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>SL</th>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <@if (Auth::user()->can('user_edit') || Auth::user()->can('user_delete'))
-                                            <th>Action</th>
-                                            @endif
+                                        <th>Action</th>
+                                        <th>Description</th>
+                                        <th>User</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($users as $key => $user)
+                                    @foreach ($logs as $log)
                                         <tr>
-                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $loop->iteration }}</td>
                                             <td>
-                                                @if ($user->image)
-                                                    <img src="{{ asset($user->image) }}" class="img-circle elevation-2"
-                                                        width="35" alt="User Image">
+                                                @if (Str::contains(strtolower($log->action), 'delete'))
+                                                    <span
+                                                        class="text-danger fw-bold">{{ $log->action }}</span>
                                                 @else
-                                                    <img src="https://placehold.co/100x100?font=roboto"
-                                                        class="img-circle elevation-2" width="35" alt="User Image">
+                                                    {{ $log->action }}
                                                 @endif
                                             </td>
-                                            <td>{{ $user->name }}</td>
-                                            <td> {{ $user->email }}</td>
-                                            @if (Auth::user()->can('user_edit') || Auth::user()->can('user_delete'))
-                                                <td>
-                                                    @if (Auth::user()->id != $user->id)
-                                                        @can('user_edit')
-                                                            <a href="{{ route('user.edit', $user->id) }}"
-                                                                class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
-                                                        @endcan
-                                                        @can('user_delete')
-                                                            <button type="button"
-                                                                class="btn btn-sm  btn-danger js-bs-tooltip-enabled mx-2"
-                                                                onclick="deleteUser(this)" data-id="{{ $user->id }}">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        @endcan
-                                                    @endif
-                                                </td>
-                                            @endif
+
+                                            <td>{{ $log->description }}</td>
+                                            <td>{{ $log->user->name ?? 'N/A' }}</td>
                                         </tr>
                                     @endforeach
-
                                 </tbody>
                             </table>
                         </div>
@@ -78,7 +53,6 @@
                     </div>
                     <!-- /.card -->
                 </div>
-                <!-- /.col -->
             </div>
             <!-- /.row -->
         </div>
@@ -96,21 +70,27 @@
     <script src="{{ asset('assets') }}/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
     <script src="{{ asset('assets') }}/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
     <script src="{{ asset('assets') }}/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="{{ asset('assets') }}/plugins/jszip/jszip.min.js"></script>
+    <script src="{{ asset('assets') }}/plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="{{ asset('assets') }}/plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="{{ asset('assets') }}/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="{{ asset('assets') }}/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="{{ asset('assets') }}/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 
     <!-- Page specific script -->
     <script>
         // DataTable Script
         $(function() {
-            $("#userTable").DataTable({
+            $("#categoryTable").DataTable({
                 "responsive": true,
                 "lengthChange": false,
                 "autoWidth": false,
                 "buttons": ["copy", "csv", "excel", "pdf", "print"]
-            }).buttons().container().appendTo('#userTable_wrapper .col-md-6:eq(0)');
+            }).buttons().container().appendTo('#categoryTable_wrapper .col-md-6:eq(0)');
         });
 
-        // Delete User Confirmation alart
-        function deleteUser(button) {
+        // Delete Category Confirmation alart
+        function deleteCategory(button) {
             const id = $(button).data('id');
             Swal.fire({
                 title: "Are you sure?",
@@ -123,7 +103,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
 
-                    let url = "{{ route('user.destroy', ':id') }}";
+                    let url = "{{ route('category.destroy', ':id') }}";
                     url = url.replace(':id', id);
                     let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 

@@ -5,14 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\Tax;
 use App\Models\Quote;
 use App\Models\Client;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Category;
+use App\Mail\InvoiceMail;
 use App\Models\QuoteItem;
+use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class QuoteController extends Controller
 {
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'quote_access',
+            'create'  => 'quote_add',
+            'edit'    => 'quote_edit',
+            'destroy' => 'quote_delete',
+            'convertToInvoice' => 'quote_to_invoice',
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -31,7 +52,8 @@ class QuoteController extends Controller
     {
         $clients = Client::all();
         $categories = Category::all();
-        $quote_number = 'QUT' . rand(1000, 9999);
+        $quote_number = rand(1000, 9999);
+
         $products = Product::all();
         $taxes = Tax::all();
         return view('quote.create', [
@@ -134,6 +156,9 @@ class QuoteController extends Controller
                 'tax' => ($line_total * ($tax ?? 0)) / 100,
             ]);
         }
+
+        // Log the action
+        userLog('Quote Create', 'Created a New Quote - #' . $request->quote_number);
 
         // Redirect back with success message
         return redirect()->route('quote.index')->with('success', 'Quote created successfully!');
@@ -270,6 +295,9 @@ class QuoteController extends Controller
             ]);
         }
 
+        // Log the action
+        userLog('Quote Updated', 'Updated a Quote - #' . $request->quote_number);
+
         // Redirect back with success message
         return redirect()->route('quote.index')->with('success', 'Quote updated successfully!');
     }
@@ -280,6 +308,9 @@ class QuoteController extends Controller
     public function destroy(string $id)
     {
         $quote = Quote::findOrFail($id);
+
+        // Log the action
+        userLog('Quote Delete', 'Deleted a Quote - #' . $quote->quote_number);
 
         try {
             // Delete Quote
@@ -308,5 +339,49 @@ class QuoteController extends Controller
             'success' => true,
             'client' => $client,
         ]);
+    }
+
+    public function convertToInvoice($id)
+    {
+        $quote = Quote::findOrFail($id);
+
+        $latestInvoice = Invoice::orderBy('id', 'desc')->first();
+        $invoice_number = $latestInvoice ? intval($latestInvoice->invoice_number) + 1 : 1001;
+
+        $invoice = Invoice::create([
+            'client_id' => $quote->client_id,
+            'invoice_number' => $invoice_number,
+            'invoice_date' => $quote->quote_date,
+            'discount_timing' => $quote->discount_timing,
+            'discount_type' => $quote->discount_type,
+            'discount' => $quote->discount,
+            'discount_amount' => $quote->discount_amount,
+            'subtotal' => $quote->subtotal,
+            'total' => $quote->total,
+            'tax' => $quote->tax,
+        ]);
+
+        $quoteItems = QuoteItem::where('quote_id', $id)->get();
+
+        foreach ($quoteItems as $item) {
+            InvoiceItem::create([
+                'invoice_id' => $invoice->id,
+                'product_id' => $item->product_id,
+                'qty' => $item->qty,
+                'unit_price' => $item->unit_price,
+                'tax_id' => $item->tax_id,
+                'tax' => $item->tax,
+            ]);
+        }
+
+        // Optionally, delete the quote after conversion
+        $quote->delete();
+
+        if ($invoice) {
+            Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
+            return redirect()->route('invoice.show', $invoice->id)->with('success', 'Quote converted to Invoice successfully!');
+        } else {
+            return redirect()->back()->with('error', 'Failed to convert Quote to Invoice.');
+        }
     }
 }

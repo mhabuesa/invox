@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Client extends Model
+class UserLog extends Model
 {
     use HasFactory;
-
     protected $guarded = ['id'];
 
-    public function invoices()
+    public function user()
     {
-        return $this->hasMany(Invoice::class, 'client_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

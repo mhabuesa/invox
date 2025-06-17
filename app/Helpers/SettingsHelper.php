@@ -33,4 +33,9 @@ class SettingsHelper
 
         return $envValue;
     }
+
+    public static function formatPermission($text)
+    {
+        return ucwords(str_replace('_', ' ', $text));
+    }
 }

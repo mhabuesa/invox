@@ -2,19 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use Mpdf\Mpdf;
 use App\Models\Tax;
-use App\Models\Client;
-use App\Models\Invoice;
+use App\Models\invoice;
 use App\Models\Product;
 use App\Mail\InvoiceMail;
+use App\Models\Client;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Models\InvoiceSetting;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class InvoiceController extends Controller
 {
+
+    // Permissions Method
+    public function __construct()
+    {
+        $this->setPermissions([
+            'index'   => 'invoice_access',
+            'create'  => 'invoice_add',
+            'edit'    => 'invoice_edit',
+            'destroy' => 'invoice_delete',
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -31,15 +44,22 @@ class InvoiceController extends Controller
      */
     public function create()
     {
+        $invoices = invoice::all();
+        // $invoice_number = rand(100000, 999999);
+
+        $latestInvoice = Invoice::orderBy('id', 'desc')->first();
+        $invoice_number = $latestInvoice ? intval($latestInvoice->invoice_number) + 1 : 1001;
         $clients = Client::all();
-        $invoice_number =rand(100000, 999999);
+
+
         $products = Product::all();
         $taxes = Tax::all();
         return view('invoice.create', [
-            'clients' => $clients,
+            'invoices' => $invoices,
             'invoice_number' => $invoice_number,
             'products' => $products,
-            'taxes' => $taxes
+            'taxes' => $taxes,
+            'clients' => $clients,
         ]);
     }
 
@@ -49,7 +69,6 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'client_id' => 'required',
             'invoice_number' => 'required|unique:invoices,invoice_number',
             'invoice_date' => 'required',
             'product_id' => 'required|array',
@@ -138,6 +157,8 @@ class InvoiceController extends Controller
 
         Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
 
+        // Log the action
+        userLog('Invoice Create', 'Created a New Invoice - #' . $request->invoice_number);
 
         // Redirect back with success message
         return redirect()->route('invoice.index')->with('success', 'Invoice created successfully!');
@@ -148,12 +169,12 @@ class InvoiceController extends Controller
      */
     public function show(string $id)
     {
-        $invoice = Invoice::with('items')->find($id);
+        $invoice = Invoice::with('items')->where('invoice_number', $id)->first();
         $invoice_setting = InvoiceSetting::first();
         if (!$invoice) {
             abort(404, 'Invoice not found');
         }
-        return view('invoice.invoice',[
+        return view('invoice.invoice', [
             'invoice' => $invoice,
             'invoice_setting' => $invoice_setting
         ]);
@@ -164,19 +185,21 @@ class InvoiceController extends Controller
      */
     public function edit(string $id)
     {
-        $clients = Client::all();
+        $invoices = invoice::all();
         $invoice_number = 'QUT' . rand(1000, 9999);
         $products = Product::all();
         $taxes = Tax::all();
         $invoiceData = Invoice::findOrFail($id);
+        $clients = Client::all();
 
         $invoiceProducts = InvoiceItem::where('invoice_id', $id)->get();
         return view('invoice.edit', [
-            'clients' => $clients,
-            'invoice_number' => $invoice_number,
+            'invoices' => $invoices,
+            // 'invoice_number' => $invoice_number,
             'products' => $products,
             'taxes' => $taxes,
             'invoiceData' => $invoiceData,
+            'clients' => $clients,
             'invoiceProducts' => $invoiceProducts
         ]);
     }
@@ -187,7 +210,7 @@ class InvoiceController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'client_id' => 'required',
+            'invoice_id' => 'required',
             'invoice_number' => 'required|unique:invoices,invoice_number,' . $id,
             'invoice_date' => 'required',
             'product_id' => 'required|array',
@@ -238,7 +261,7 @@ class InvoiceController extends Controller
         // Update main Invoice record to database
         $invoice = Invoice::findOrFail($id);
         $invoice->update([
-            'client_id' => $request->client_id,
+            'invoice_id' => $request->invoice_id,
             'invoice_number' => $request->invoice_number,
             'invoice_date' => $request->invoice_date,
             'discount_timing' => $discount_timing,
@@ -280,6 +303,9 @@ class InvoiceController extends Controller
             ]);
         }
 
+        // Log the action
+        userLog('Invoice Updated', 'Updated a Invoice - #' . $request->invoice_number);
+
         // Redirect back with success message
         return redirect()->route('invoice.index')->with('success', 'Invoice updated successfully!');
     }
@@ -290,6 +316,9 @@ class InvoiceController extends Controller
     public function destroy(string $id)
     {
         $invoice = Invoice::findOrFail($id);
+
+        // Log the action
+        userLog('Invoice Delete', 'Deleted a Invoice - #' . $invoice->invoice_number);
 
         try {
             // Delete invoice
@@ -302,21 +331,21 @@ class InvoiceController extends Controller
         return response()->json(['success' => true, 'message' => 'Invoice Deleted Successfully'], 200);
     }
 
-    public function addClientAjax(Request $request)
+    public function addinvoiceAjax(Request $request)
     {
         $request->validate([
-            'client_name' => 'required|string|max:255|unique:clients,name',
-            'email' => 'required|email|unique:clients,email',
+            'invoice_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:invoices,email',
         ]);
 
-        $client = Client::create([
-            'name' => $request->client_name,
+        $invoice = invoice::create([
+            'name' => $request->invoice_name,
             'email' => $request->email
         ]);
 
         return response()->json([
             'success' => true,
-            'client' => $client,
+            'invoice' => $invoice,
         ]);
     }
 }

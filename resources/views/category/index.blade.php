@@ -26,7 +26,9 @@
                                         <th>SL</th>
                                         <th>Name</th>
                                         <th>Products</th>
-                                        <th>Action</th>
+                                        @if (Auth::user()->can('category_edit') || Auth::user()->can('category_delete'))
+                                            <th>Action</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -35,16 +37,23 @@
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $category->name }}</td>
                                             <td> {{ $category->products->count() }}</td>
-                                            <td>
-                                                <a href="javascript:void(0);" class="btn btn-primary btn-sm"
-                                                    data-toggle="modal" data-target="#category-{{ $category->id }}">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger mx-2"
-                                                    onclick="deleteCategory(this)" data-id="{{ $category->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
+                                            @if (Auth::user()->can('category_edit') || Auth::user()->can('category_delete'))
+                                                <td>
+                                                    @can('category_edit')
+                                                        <a href="javascript:void(0);" class="btn btn-primary btn-sm"
+                                                            data-toggle="modal" data-target="#category-{{ $category->id }}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @endcan
+
+                                                    @can('category_delete')
+                                                        <button type="button" class="btn btn-sm btn-danger mx-2"
+                                                            onclick="deleteCategory(this)" data-id="{{ $category->id }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    @endcan
+                                                </td>
+                                            @endif
                                         </tr>
 
                                         <!-- Modal for editing category -->
@@ -66,8 +75,7 @@
                                                             <div class="form-group">
                                                                 <label for="name">Name</label>
                                                                 <input type="text" class="form-control"
-                                                                    name="category_name"
-                                                                    placeholder="Enter Category name"
+                                                                    name="category_name" placeholder="Enter Category name"
                                                                     value="{{ $category->name }}">
                                                                 <div class="text-danger mt-1 error-message"></div>
                                                             </div>
@@ -92,34 +100,35 @@
                     </div>
                     <!-- /.card -->
                 </div>
-                <div class="col-lg-3">
-                    <div class="card ">
-                        <div class="card-header">
-                            <h3 class="card-title"> Add Category</h3>
-                        </div>
-                        <!-- /.card-header -->
-                        <!-- form start -->
-                        <form method="POST" action="{{ route('category.store') }}">
-                            @csrf
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="name">Name</label>
-                                    <input type="text" class="form-control" id="name"
-                                        placeholder="Enter Category name" name="name">
-                                    @error('name')
-                                        <div class="text-danger mt-1">{{ $message }}</div>
-                                    @enderror
+                @can('category_add')
+                    <div class="col-lg-3">
+                        <div class="card ">
+                            <div class="card-header">
+                                <h3 class="card-title"> Add Category</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <form method="POST" action="{{ route('category.store') }}">
+                                @csrf
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name"
+                                            placeholder="Enter Category name" name="name">
+                                        @error('name')
+                                            <div class="text-danger mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-info float-right">Submit</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- /.card-body -->
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-info float-right">Submit</button>
-                            </div>
-                        </form>
+                                <!-- /.card-body -->
+                            </form>
+                        </div>
                     </div>
-                </div>
-                <!-- /.col -->
+                    <!-- /.col -->
+                @endcan
             </div>
             <!-- /.row -->
         </div>

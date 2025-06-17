@@ -8,18 +8,48 @@
     @if ($setting->favicon)
         <link rel="icon" href="{{ asset($setting->favicon) }}">
     @else
-        <link rel="icon" href="{{ asset('assets') }}/dist/img/logo/favicon.png">
+        <link rel="icon" href="{{ asset('assets/dist/img/logo/favicon.png') }}">
     @endif
-    <link rel="stylesheet" href="{{ asset('assets') }}/invoice/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/invoice/style.css') }}">
     <!-- Meta Tags -->
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Dev Hunter">
+
+    <style>
+        .spinner-custom {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 123, 255, 0.2);
+            /* Light border */
+            border-top-color: #007bff;
+            /* Primary color */
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+
+
+
 </head>
 
 <body>
-    <div class="tm_container">
+    <div class="tm_container" id="invoice_content">
         <div class="tm_invoice_wrap">
             <div class="tm_invoice tm_style1 tm_type1" id="tm_download_section">
                 <div class="tm_invoice_in">
@@ -150,9 +180,10 @@
                                 <div class="tm_left_footer"></div>
                                 <div class="tm_right_footer">
                                     <div class="tm_sign tm_text_center">
-                                        <img src="{{asset($invoice_setting->signature)}}" alt="Sign">
+                                        <img src="{{ asset($invoice_setting->signature) }}" alt="Sign">
                                         <p class="tm_m0 tm_ternary_color">{{ $invoice_setting->name }}</p>
-                                        <p class="tm_m0 tm_f16 tm_primary_color">{{ $invoice_setting->designation }}</p>
+                                        <p class="tm_m0 tm_f16 tm_primary_color">{{ $invoice_setting->designation }}
+                                        </p>
                                         </p>
                                     </div>
                                 </div>
@@ -188,9 +219,10 @@
                     </span>
                     <span class="tm_btn_text">Print</span>
                 </a>
-                <button id="tm_download_btn" class="tm_invoice_btn tm_color2">
-                    <span class="tm_btn_icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewbox="0 0 512 512">
+                <a href="#" id="tm_download_btn" class="tm_invoice_btn tm_color2">
+                    <span class="tm_btn_icon" id="download_icon">
+                        <!-- Original Download Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
                             <path
                                 d="M320 336h76c55 0 100-21.21 100-75.6s-53-73.47-96-75.6C391.11 99.74 329 48 256 48c-69 0-113.44 45.79-128 91.2-60 5.7-112 35.88-112 98.4S70 336 136 336h56M192 400.1l64 63.9 64-63.9M256 224v224.03"
                                 fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -198,10 +230,52 @@
                         </svg>
                     </span>
                     <span class="tm_btn_text">Download</span>
-                </button>
+                </a>
+
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        document.getElementById('tm_download_btn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const buttonIcon = this.querySelector('.tm_btn_icon');
+            const originalIcon = buttonIcon.innerHTML;
+
+            // Show loading spinner
+            buttonIcon.innerHTML = `<div class="spinner-custom"></div>`;
+
+            const element = document.getElementById('invoice_content');
+
+            const opt = {
+                filename: 'invoice_{{ $invoice->invoice_number }}.pdf',
+                image: {
+                    type: 'jpeg',
+                    quality: 1
+                },
+                html2canvas: {
+                    scale: 2
+                },
+                jsPDF: {
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Spinner stays for 0.5 second then original icon returns
+                setTimeout(() => {
+                    buttonIcon.innerHTML = originalIcon;
+                }, 500);
+            }).catch((err) => {
+                console.error('PDF Error:', err);
+                buttonIcon.innerHTML = originalIcon;
+            });
+        });
+    </script>
+
+
 </body>
 
 </html>
