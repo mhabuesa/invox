@@ -43,7 +43,7 @@ class AuthenticatedSessionController extends Controller
             Cookie::queue(Cookie::forget('remember_me'));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('index', absolute: false));
     }
 
     /**

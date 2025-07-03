@@ -35,8 +35,7 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>
                                                 @if (Str::contains(strtolower($log->action), 'delete'))
-                                                    <span
-                                                        class="text-danger fw-bold">{{ $log->action }}</span>
+                                                    <span class="text-danger fw-bold">{{ $log->action }}</span>
                                                 @else
                                                     {{ $log->action }}
                                                 @endif

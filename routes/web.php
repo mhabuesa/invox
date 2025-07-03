@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -22,11 +23,11 @@ Route::middleware('auth')->group(function () {
 
     //Dashboard Controller Group
     Route::controller(DashboardController::class)->group(function () {
-        Route::get('/', 'home');
+        Route::get('/', 'index')->name('index');
         Route::get('/dashboard', 'dashboard')->name('dashboard');
     });
 
-     // Common Controller Group
+    // Common Controller Group
     Route::controller(CommonController::class)->group(function () {
         Route::get('/dbBackup', 'dbBackup')->name('dbBackup');
         Route::get('/activityLog', 'activityLog')->name('activityLog');
@@ -97,7 +98,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('/category', CategoryController::class);
     Route::resource('/client', ClientController::class);
     Route::resource('/user', UserController::class);
+});
 
+// Installation Middleware Group
+Route::controller(InstallationController::class)->group(function () {
+    Route::get('/install', 'install')->name('install');
+    Route::post('/verify-license', 'verifyLicense');
+    Route::post('/check-db', 'check_db')->name('check.db');
 });
 
 require __DIR__ . '/auth.php';

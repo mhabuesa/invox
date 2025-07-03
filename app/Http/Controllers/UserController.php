@@ -15,7 +15,7 @@ class UserController extends Controller
     public function __construct()
     {
         $this->setPermissions([
-            'index'   => 'user_access',
+            'index'   => 'user_list',
             'create'  => 'user_add',
             'edit'    => 'user_edit',
             'destroy' => 'user_delete',

@@ -15,7 +15,7 @@ class ClientController extends Controller
     public function __construct()
     {
         $this->setPermissions([
-            'index'   => 'client_access',
+            'index'   => 'client_list',
             'create'  => 'client_add',
             'edit'    => 'client_edit',
             'destroy' => 'client_delete',
@@ -114,7 +114,7 @@ class ClientController extends Controller
         $client = Client::findOrFail($id);
 
         // Log the action
-        userLog('Client Destroy', 'Destroyed a Client - ' . $client->name);
+        userLog('Client Delete', 'Destroyed a Client - ' . $client->name);
 
         try {
             // Delete client

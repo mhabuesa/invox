@@ -31,9 +31,9 @@
                                         <th>Image</th>
                                         <th>Name</th>
                                         <th>Email</th>
-                                        <@if (Auth::user()->can('user_edit') || Auth::user()->can('user_delete'))
+                                        @if (Auth::user()->can('user_edit') || Auth::user()->can('user_delete'))
                                             <th>Action</th>
-                                            @endif
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>

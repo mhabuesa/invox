@@ -19,12 +19,11 @@ abstract class Controller extends BaseController
      */
     protected function setPermissions(array $permissions)
     {
-        foreach ($permissions as $methods => $permissionName) {
-            if (is_array($methods)) {
-                $this->middleware("permission:{$permissionName}")->only($methods);
-            } else {
-                $this->middleware("permission:{$permissionName}")->only([$methods]);
+        foreach ($permissions as $method => $permissionName) {
+            if (is_array($permissionName)) {
+                $permissionName = implode('|', $permissionName); // OR logic
             }
+            $this->middleware("permission:{$permissionName}")->only([$method]);
         }
     }
 }

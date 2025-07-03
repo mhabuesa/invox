@@ -1,7 +1,7 @@
 <!-- PHP Variables for Active Menus -->
 @php
     $route = request()->route()->getName();
-    $isDashboard = request()->routeIs('dashboard');
+    $isDashboard = request()->routeIs('index');
     $isQuote = request()->routeIs('quote.*');
     $isInvoice = request()->routeIs('invoice.*');
     $isTax = request()->routeIs('tax.*');
@@ -49,7 +49,7 @@
 
                 <!-- Dashboard -->
                 <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link {{ $isDashboard ? 'active-single-nav' : '' }}">
+                    <a href="{{ route('index') }}" class="nav-link {{ $isDashboard ? 'active-single-nav' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
@@ -240,7 +240,7 @@
                         </a>
                     </li>
                 @endcan
-                
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
