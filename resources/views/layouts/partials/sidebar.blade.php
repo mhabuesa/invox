@@ -1,7 +1,7 @@
 <!-- PHP Variables for Active Menus -->
 @php
     $route = request()->route()->getName();
-    $isDashboard = request()->routeIs('index');
+    $isIndex = request()->routeIs('index');
     $isQuote = request()->routeIs('quote.*');
     $isInvoice = request()->routeIs('invoice.*');
     $isTax = request()->routeIs('tax.*');
@@ -15,15 +15,10 @@
 @endphp
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{ route('dashboard') }}" class="brand-link">
-        @if ($setting->logo)
-            <img src="{{ asset($setting->logo) }}" alt="Logo" class="brand-image img-circle elevation-3"
+    <a href="{{ route('index') }}" class="brand-link">
+        <img src="{{ asset($setting->logo ?? '/assets/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3"
                 style="opacity: .8">
-        @else
-            <img src="{{ asset('assets') }}/dist/img/AdminLTELogo.png" alt="AdminLTE Logo"
-                class="brand-image img-circle elevation-3" style="opacity: .8">
-        @endif
-        <span class="brand-text font-weight-light">{{ $setting->company_name }}</span>
+        <span class="brand-text font-weight-light">{{ $setting->app_name ?? config('app.name') }}</span>
     </a>
 
     <!-- Sidebar -->
@@ -49,7 +44,7 @@
 
                 <!-- Dashboard -->
                 <li class="nav-item">
-                    <a href="{{ route('index') }}" class="nav-link {{ $isDashboard ? 'active-single-nav' : '' }}">
+                    <a href="{{ route('index') }}" class="nav-link {{ $isIndex ? 'active-single-nav' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>

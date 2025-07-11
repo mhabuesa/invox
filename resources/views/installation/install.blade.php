@@ -251,9 +251,18 @@
                         <button onclick="prevStep()"
                             class="text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg">← Back</button>
                         <button onclick="checkDbConnection()" id="checkDbBtn"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
-                            Test Connection →
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg flex items-center justify-center gap-2">
+                            <span id="checkDbText">Test Connection →</span>
+                            <svg id="db-spinner" class="w-4 h-4 text-white animate-spin hidden" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                                </path>
+                            </svg>
                         </button>
+
+
                     </div>
                 </div>
 
@@ -264,20 +273,36 @@
                     <div class="space-y-6">
                         <input type="text" id="admin-name"
                             class="w-full px-4 py-3 rounded-lg border border-gray-300" placeholder="Full Name">
+                        <small id="admin-name-error" class="text-red-600 text-sm hidden mt-1"></small>
+
                         <input type="text" id="admin-email"
                             class="w-full px-4 py-3 rounded-lg border border-gray-300"
                             placeholder="admin@example.com">
+                        <small id="admin-email-error" class="text-red-600 text-sm hidden mt-1"></small>
+
                         <input type="password" id="admin-pass"
                             class="w-full px-4 py-3 rounded-lg border border-gray-300" placeholder="Password">
+                        <small id="admin-pass-error" class="text-red-600 text-sm hidden mt-1"></small>
+
                         <input type="password" id="admin-pass-confirm"
                             class="w-full px-4 py-3 rounded-lg border border-gray-300" placeholder="Confirm Password">
+                        <small id="admin-pass-confirm-error" class="text-red-600 text-sm hidden mt-1"></small>
                     </div>
                     <div class="flex justify-between mt-10">
                         <button onclick="prevStep()"
                             class="text-gray-600 hover:text-gray-800 font-medium py-2 px-4 rounded-lg">← Back</button>
-                        <button onclick="nextStep()"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">Complete
-                            Setup →</button>
+                        <button onclick="nextStepFromAdminSetup()" id="admin-setup-btn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2">
+                            <span id="admin-setup-text">Complete Setup →</span>
+                            <svg id="admin-spinner" class="hidden w-5 h-5 text-white animate-spin" fill="none"
+                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                                </path>
+                            </svg>
+                        </button>
+
                     </div>
                 </div>
 
@@ -285,134 +310,16 @@
                 <div id="step-5" class="step-content text-center">
                     <h2 class="text-3xl font-bold text-gray-800 mb-4">Installation Complete!</h2>
                     <p class="text-gray-600 mb-6">You may now login to your admin panel.</p>
-                    <a href="#"
+                    <a href="{{ route('login') }}"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg">Go to Admin
-                        Dashboard</a>
+                        Login →</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentStep = 1;
-        const totalSteps = 5;
 
-        function updateProgress() {
-            const progressPercentage = (currentStep / totalSteps) * 100;
-            document.getElementById('progress').style.width = `${progressPercentage}%`;
-            document.getElementById('current-step').textContent = currentStep;
-        }
-
-        function changeStep(step) {
-            document.querySelector('.step-content.active').classList.remove('active');
-            document.querySelector(`#step-${step}`).classList.add('active');
-            currentStep = step;
-            updateProgress();
-        }
-
-        function nextStep() {
-            if (currentStep < totalSteps) changeStep(currentStep + 1);
-        }
-
-        function prevStep() {
-            if (currentStep > 1) changeStep(currentStep - 1);
-        }
-
-        function checkDbConnection() {
-            const name = document.getElementById('db-name').value;
-            const user = document.getElementById('db-user').value;
-            const pass = document.getElementById('db-pass').value;
-
-            // Hide previous messages
-            document.getElementById('dbStatus_error').classList.add('hidden');
-            document.getElementById('license_success').classList.add('hidden');
-
-            fetch('/check-db', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        db_name: name,
-                        db_user: user,
-                        db_pass: pass
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage('dbStatus_success', '✅ Database connection successful!', 'success');
-                        nextStep();
-                    } else {
-                        showMessage('dbStatus_error', '❌ Database connection failed: ' + data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    showMessage('dbStatus_error', '❌ Unexpected error occurred!', 'error');
-                });
-        }
-
-
-        function showMessage(id, message, type) {
-            const div = document.getElementById(id);
-            div.innerHTML = `
-            <div class="p-4 mb-4 text-sm rounded-lg ${type === 'success' ? 'text-green-800 bg-green-100 border border-green-300' : 'text-red-800 bg-red-100 border border-red-300'}" role="alert">
-                ${message}
-            </div>
-        `;
-            div.classList.remove('hidden');
-        }
-
-        function verifyLicense() {
-            const code = document.getElementById('purchase-code').value.trim();
-            if (!code) {
-                showMessage('license_error', 'Purchase code cannot be empty. Please enter your purchase code.', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('verify-btn');
-            const spinner = document.getElementById('verify-spinner');
-            const text = document.getElementById('verify-text');
-
-            spinner.classList.remove('hidden');
-            text.textContent = 'Verifying...';
-            btn.disabled = true;
-
-            fetch('/verify-license', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                    body: JSON.stringify({
-                        purchase_code: code
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage('license_success', data.message || 'License verified successfully!', 'success');
-                        nextStep();
-                    } else {
-                        showMessage('license_error', data.message || 'License verification failed.', 'error');
-                    }
-                })
-                .catch(err => {
-                    showMessage('license_error', 'An error occurred during verification.', 'error');
-                    console.error('AJAX Error:', err);
-                })
-                .finally(() => {
-                    spinner.classList.add('hidden');
-                    text.textContent = 'Verify License';
-                    btn.disabled = false;
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', updateProgress);
-    </script>
+    <script src="{{ asset('assets') }}/dist/js/pages/installation.js"></script>
 
 
 

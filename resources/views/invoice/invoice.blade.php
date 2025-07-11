@@ -3,7 +3,7 @@
 
 <head>
     <!-- Site Title -->
-    <title>Invoice | {{ $setting->company_name }}</title>
+    <title>Invoice | {{ $setting->app_name ?? config('app.name') }}</title>
     <!-- Favicon -->
     @if ($setting->favicon)
         <link rel="icon" href="{{ asset($setting->favicon) }}">
@@ -75,7 +75,7 @@
                         <div class="tm_invoice_left">
                             <p class="tm_mb2"><b class="tm_primary_color">Invoice To:</b></p>
                             <p>
-                                {{ $setting->company_name }} <br>
+                                {{ $setting->app_name }} <br>
                                 {{ $setting->address }} <br>
                                 <a href="{{ url('mailto:' . $setting->email) }}" class="__cf_email__"
                                     data-cfemail="5b37342c3e37371b3c363a323775383436">{{ $setting->email }}</a> <br>
@@ -175,12 +175,15 @@
                                 </table>
                             </div>
                         </div>
-                        @if ($invoice_setting->authorized_status != 0)
+                        @if (isset($invoice_setting) && $invoice_setting->authorized_status != 0)
                             <div class="tm_invoice_footer tm_type1">
                                 <div class="tm_left_footer"></div>
                                 <div class="tm_right_footer">
                                     <div class="tm_sign tm_text_center">
-                                        <img src="{{ asset($invoice_setting->signature) }}" alt="Sign">
+                                        @if (isset($invoice_setting) && $invoice_setting->signature)
+                                            <img src="{{ asset($invoice_setting->signature) }}" alt="Signature"
+                                                class="tm_signature">
+                                        @endif
                                         <p class="tm_m0 tm_ternary_color">{{ $invoice_setting->name }}</p>
                                         <p class="tm_m0 tm_f16 tm_primary_color">{{ $invoice_setting->designation }}
                                         </p>
@@ -190,7 +193,7 @@
                             </div>
                         @endif
                     </div>
-                    @if ($invoice_setting->terms_status != 0)
+                    @if (isset($invoice_setting) && $invoice_setting->terms_status != 0)
                         <div class="tm_note tm_text_center tm_font_style_normal">
                             <hr class="tm_mb15">
                             <p class="tm_mb2"><b class="tm_primary_color">Terms & Conditions:</b>

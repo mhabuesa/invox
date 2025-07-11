@@ -11,7 +11,7 @@ class EnvatoHelper
         // Check if app is running in local/dev environment
         if (app()->environment('local')) {
             // Return mock response for testing
-            if ($purchaseCode === '1279') {
+            if ($purchaseCode === '1234') {
                 return [
                     'item' => [
                         'name' => 'Invox Laravel Invoice Script',

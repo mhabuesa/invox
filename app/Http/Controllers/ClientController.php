@@ -14,11 +14,12 @@ class ClientController extends Controller
     // Permissions Method
     public function __construct()
     {
+        // Define required permissions for each action in the Client module
         $this->setPermissions([
-            'index'   => 'client_list',
-            'create'  => 'client_add',
-            'edit'    => 'client_edit',
-            'destroy' => 'client_delete',
+            'index'   => 'client_list',   // Permission to view client list
+            'create'  => 'client_add',    // Permission to add a new client
+            'edit'    => 'client_edit',   // Permission to edit existing client
+            'destroy' => 'client_delete', // Permission to delete a client
         ]);
     }
     /**

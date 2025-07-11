@@ -29,13 +29,13 @@
                                             <td>{{ $user->name }}</td>
                                             <td>
                                                 @forelse ($user->getRoleNames() as $key => $role)
-                                                    <span class="badge badge-info">{{ $role }}</span>
+                                                    <span class="badge badge-info">{{ formatPermission($role) }}</span>
                                                 @empty
                                                     <span class="badge badge-danger">Not Assigned</span>
                                                 @endforelse
                                             </td>
                                             <td>
-                                                @if ($user->getRoleNames()->count() > 0)
+                                                @if ($user->getRoleNames()->count() > 0 && !$user->hasRole('super_admin'))
                                                     <a href="javascript:void(0);" class="btn btn-danger btn-sm"
                                                         onclick="deleteUserRole(this)" data-id="{{ $user->id }}">
                                                         <i class="fas fa-trash"></i>
@@ -71,23 +71,28 @@
                                     @foreach ($roles as $key => $role)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ $role->name }}</td>
+                                            <td>{{ formatPermission($role->name) }}</td>
                                             <td>
-                                                @if ($role->permissions->count() > 0)
+                                                @if ($role->name == 'super_admin')
+                                                    <span class="badge badge-success">No Permission Required</span>
+                                                @elseif ($role->permissions->count() > 0)
                                                     @foreach ($role->permissions as $permission)
-                                                        <span class="badge badge-info">{{ formatPermission($permission->name) }}</span>
+                                                        <span
+                                                            class="badge badge-info">{{ formatPermission($permission->name) }}</span>
                                                     @endforeach
                                                 @else
                                                     <span class="badge badge-danger">No Permission</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <a href="{{ route('role.edit', $role->id) }}" class="btn btn-info btn-sm"><i
-                                                        class="fas fa-edit"></i></a>
-                                                <a href="javascript:void(0);" class="btn btn-danger btn-sm"
-                                                    onclick="deleteRole(this)" data-id="{{ $role->id }}">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
+                                                @if ($role->name != 'super_admin')
+                                                    <a href="{{ route('role.edit', $role->id) }}"
+                                                        class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-danger btn-sm"
+                                                        onclick="deleteRole(this)" data-id="{{ $role->id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                @endif
 
                                             </td>
                                         </tr>
@@ -103,31 +108,6 @@
                 <!-- /.col -->
                 <div class="col-lg-4">
                     <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Permissions</h3>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-body">
-                                    <form action="{{ route('permission.store') }}" method="post">
-                                        @csrf
-                                        <div class="form-group">
-                                            <label for="name">Permission Name</label>
-                                            <input type="text" class="form-control" id="name" name="permission_name"
-                                                placeholder="Enter permission name" required
-                                                value="{{ old('permission_name') }}">
-                                            @error('permission_name')
-                                                <span class="text-danger text-capitalize">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                        <button type="submit" class="btn btn-info">Submit</button>
-                                    </form>
-                                </div>
-                                <!-- /.card-body -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
@@ -275,24 +255,24 @@
         }
     </script>
     <script>
-    $(document).ready(function () {
-        // Select all toggle
-        $('#select_all').on('change', function () {
-            $('input[name="permission[]"]').prop('checked', this.checked);
-        });
+        $(document).ready(function() {
+            // Select all toggle
+            $('#select_all').on('change', function() {
+                $('input[name="permission[]"]').prop('checked', this.checked);
+            });
 
-        // Individual uncheck -> uncheck select all
-        $('input[name="permission[]"]').on('change', function () {
-            if (!this.checked) {
-                $('#select_all').prop('checked', false);
-            } else {
-                // If all are checked, then mark select_all as checked
-                if ($('input[name="permission[]"]:checked').length === $('input[name="permission[]"]').length) {
-                    $('#select_all').prop('checked', true);
+            // Individual uncheck -> uncheck select all
+            $('input[name="permission[]"]').on('change', function() {
+                if (!this.checked) {
+                    $('#select_all').prop('checked', false);
+                } else {
+                    // If all are checked, then mark select_all as checked
+                    if ($('input[name="permission[]"]:checked').length === $('input[name="permission[]"]')
+                        .length) {
+                        $('#select_all').prop('checked', true);
+                    }
                 }
-            }
+            });
         });
-    });
-</script>
-
+    </script>
 @endpush

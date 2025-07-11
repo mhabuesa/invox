@@ -4,17 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'App') | {{ $setting->company_name }}</title>
+    <title>@yield('title', 'App') | {{ $setting->app_name ?? config('app.name') }}</title>
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon -->
-    @if ($setting->favicon)
-        <link rel="icon" href="{{ asset($setting->favicon) }}">
-    @else
-        <link rel="icon" href="{{ asset('assets') }}/dist/img/logo/favicon.png">
-    @endif
+    <link rel="icon" href="{{ asset($setting->favicon ?? 'assets/dist/img/logo/favicon.png') }}">
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="{{ asset('assets') }}/dist/css/custom.css">
     <!-- Font Awesome -->

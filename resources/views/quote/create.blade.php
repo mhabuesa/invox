@@ -125,8 +125,8 @@
                                                 <div class="form-group col-md-2">
                                                     <label for="tax">Tax</label>
                                                     <div class="input-group mb-3">
-                                                        <select class="form-control tax" id="tax" name="tax_id[]">
-                                                            <option value="0">Select Tax</option>
+                                                        <select class="form-control tax" id="tax" name="tax_id[]" required>
+                                                            <option value="" >Select Tax</option>
                                                             @foreach ($taxes as $tax)
                                                                 <option {{ $tax->status == 1 ? 'selected' : '' }}
                                                                     value="{{ $tax->id }}" data-tax="{{ $tax->value }}">{{ $tax->name }}

@@ -75,14 +75,14 @@
                 <section class="col-lg-6 connectedSortable">
 
                     <!-- Map card -->
-                    <div class="card bg-gradient-primary">
+                    <div class="card bg-gradient-light">
                         <div class="card-header border-0">
                             <h3 class="card-title">
                                 Latest Invoices
                             </h3>
                             <!-- card tools -->
                             <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse"
+                                <button type="button" class="btn btn-dark btn-sm" data-card-widget="collapse"
                                     title="Collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
@@ -123,14 +123,14 @@
                 <section class="col-lg-6 connectedSortable">
 
                     <!-- Map card -->
-                    <div class="card bg-gradient-primary">
+                    <div class="card bg-gradient-light">
                         <div class="card-header border-0">
                             <h3 class="card-title">
                                 Top Clients
                             </h3>
                             <!-- card tools -->
                             <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse"
+                                <button type="button" class="btn btn-dark btn-sm" data-card-widget="collapse"
                                     title="Collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>

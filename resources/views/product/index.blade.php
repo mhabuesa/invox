@@ -58,7 +58,14 @@
                                             </td>
                                             <td> {{ $product->quantity }}</td>
                                             <td> {{ $product->code }}</td>
-                                            <td> {{ $product->category->name }}</td>
+                                            <td>
+                                                @if ($product->category)
+                                                    {{ $product->category->name }}
+                                                @else
+                                                    <span class="text-danger">Invalid Category</span>
+                                                @endif
+
+                                            </td>
                                             <td> {{ $product->unit_price }}</td>
                                             @if (Auth::user()->can('product_edit') || Auth::user()->can('product_delete'))
                                                 <td>
@@ -126,7 +133,12 @@
                                                                     <div class="form-group col-md-6">
                                                                         <label
                                                                             class="mb-3 font-weight-bold">Category</label>
-                                                                        <p>{{ $product->category->name }}</p>
+                                                                        @if ($product->category)
+                                                                            <p>{{ $product->category->name }}</p>
+                                                                        @else
+                                                                            <p class="text-danger">Invalid
+                                                                                Category</p>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group col-md-12">

@@ -3,7 +3,7 @@
 
 <head>
     <!-- Site Title -->
-    <title>Invoice | {{ $setting->company_name }}</title>
+    <title>Invoice | {{ $setting->app_name }}</title>
     <!-- Favicon -->
     @if ($setting->favicon)
         <link rel="icon" href="{{ asset($setting->favicon) }}">
@@ -1760,7 +1760,7 @@
                     <div class="cs-invoice_left">
                         <b class="cs-primary_color">Invoice To:</b>
                         <p>
-                            {{ $setting->company_name }}<br>
+                            {{ $setting->app_name }}<br>
                             {{ $setting->address }}<br>
                             {{ $setting->email }}<br>
                             {{ $setting->phone }}

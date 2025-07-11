@@ -125,8 +125,8 @@
                                                 <div class="form-group col-md-2">
                                                     <label for="tax">Tax</label>
                                                     <div class="input-group mb-3">
-                                                        <select class="form-control tax" id="tax" name="tax_id[]">
-                                                            <option value="0">Select Tax</option>
+                                                        <select class="form-control tax" id="tax" name="tax_id[]" required>
+                                                            <option value="">Select Tax</option>
                                                             @foreach ($taxes as $tax)
                                                                 <option {{ $tax->status == 1 ? 'selected' : '' }}
                                                                     value="{{ $tax->id }}" data-tax="{{ $tax->value }}">{{ $tax->name }}
@@ -214,6 +214,14 @@
                                         <div class="mb-3 d-flex justify-content-between">
                                             <strong>Total :</strong>
                                             <strong><span id="grandTotal">0.00</span></strong>
+                                        </div>
+                                        <div class="mb-3 d-flex justify-content-between">
+                                            <strong>Paid :</strong>
+                                            <strong class="justify-content-end d-flex"><input type="text" name="paid" id="paid" class="form-control w-50"></strong>
+                                        </div>
+                                        <div class="mb-3 d-flex justify-content-between">
+                                            <strong>Due :</strong>
+                                            <strong><span id="due">0.00</span></strong>
                                         </div>
                                     </div>
 

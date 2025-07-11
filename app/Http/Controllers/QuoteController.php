@@ -379,7 +379,7 @@ class QuoteController extends Controller
 
         if ($invoice) {
             Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
-            return redirect()->route('invoice.show', $invoice->id)->with('success', 'Quote converted to Invoice successfully!');
+            return redirect()->route('invoice.show', $invoice->invoice_number)->with('success', 'Quote converted to Invoice successfully!');
         } else {
             return redirect()->back()->with('error', 'Failed to convert Quote to Invoice.');
         }

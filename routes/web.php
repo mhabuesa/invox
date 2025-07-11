@@ -24,7 +24,6 @@ Route::middleware('auth')->group(function () {
     //Dashboard Controller Group
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/dashboard', 'dashboard')->name('dashboard');
     });
 
     // Common Controller Group
@@ -105,6 +104,7 @@ Route::controller(InstallationController::class)->group(function () {
     Route::get('/install', 'install')->name('install');
     Route::post('/verify-license', 'verifyLicense');
     Route::post('/check-db', 'check_db')->name('check.db');
+    Route::post('/admin/setup', 'admin_setup')->name('admin.setup');
 });
 
 require __DIR__ . '/auth.php';

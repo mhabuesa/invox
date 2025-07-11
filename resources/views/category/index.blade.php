@@ -112,9 +112,9 @@
                                 @csrf
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="name">Name</label>
+                                        <label for="name">Category Name</label>
                                         <input type="text" class="form-control" id="name"
-                                            placeholder="Enter Category name" name="name">
+                                            placeholder="Enter Category name" name="name" value="{{ old('name') }}" required>
                                         @error('name')
                                             <div class="text-danger mt-1">{{ $message }}</div>
                                         @enderror
