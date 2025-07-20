@@ -30,7 +30,9 @@
                                         <th>SL</th>
                                         <th>Client</th>
                                         <th>Invoice Date</th>
-                                        <th>Amount</th>
+                                        <th>Total</th>
+                                        <th>Paid</th>
+                                        <th>Due</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -49,12 +51,17 @@
                                             </td>
                                             <td>{{ $invoice->invoice_date->format('m/d/Y') }}</td>
                                             <td> <strong> {{ currency($invoice->total) }}</strong></td>
+                                            <td> <strong class="text-success">
+                                                    {{ currency($invoice->payment->sum('amount')) }}</strong></td>
+                                            <td> <strong class="text-danger">
+                                                    {{ currency($invoice->total - $invoice->payment->sum('amount')) }}</strong>
+                                            </td>
                                             <td>
                                                 <div class="btn-group">
                                                     <button type="button"
                                                         class="btn btn-default dropdown-toggle dropdown-icon"
                                                         data-toggle="dropdown" aria-expanded="false">
-                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                        <span class="">Action</span>
                                                     </button>
                                                     <div class="dropdown-menu" role="menu" style="">
                                                         @can('invoice_edit')
@@ -62,12 +69,13 @@
                                                                 href="{{ route('invoice.edit', $invoice->id) }}"><i
                                                                     class="fas fa-edit fa-sm"></i> Edit</a>
                                                         @endcan
-                                                        @can('invoice_delete')
-                                                            <a class="dropdown-item text-danger" href="#"
-                                                                onclick="deleteInvoice(this)" data-id="{{ $invoice->id }}"> <i
-                                                                    class="fas fa-trash fa-sm"></i> Delete</a>
-                                                            <div class="dropdown-divider"></div>
+                                                        @can('invoice_payment')
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('invoice.payment', $invoice->id) }}">
+                                                            <i class="far fa-credit-card"></i> Payment</a>
                                                         @endcan
+
+
                                                         <div class="dropdown-item d-flex justify-content-between">
                                                             <span>
                                                                 <a target="_blank"
@@ -77,8 +85,14 @@
                                                             </span>
                                                             <span class="cursor-pointer"
                                                                 onclick="copyToClipboard('{{ route('invoice.show', $invoice->invoice_number) }}')"><i
-                                                                    class="fas fa-copy"></i></span></a>
+                                                                    class="fas fa-copy"></i></span>
                                                         </div>
+                                                        @can('invoice_delete')
+                                                        <div class="dropdown-divider"></div>
+                                                            <a class="dropdown-item text-danger" href="#"
+                                                                onclick="deleteInvoice(this)" data-id="{{ $invoice->id }}"> <i
+                                                                    class="fas fa-trash fa-sm"></i> Delete</a>
+                                                        @endcan
                                                     </div>
                                                 </div>
                                             </td>

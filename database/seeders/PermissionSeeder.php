@@ -23,6 +23,7 @@ class PermissionSeeder extends Seeder
             'invoice_add',
             'invoice_edit',
             'invoice_delete',
+            'invoice_payment',
             'tax_access',
             'tax_add',
             'tax_edit',

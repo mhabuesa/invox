@@ -11,7 +11,7 @@ use App\Models\Client;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Models\InvoiceSetting;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -74,6 +74,8 @@ class InvoiceController extends Controller
             'product_id' => 'required|array',
             'qty' => 'required|array',
             'unit_price' => 'required|array',
+            'paid' => 'nullable|numeric|min:0'
+
         ]);
 
         $subtotal = 0;
@@ -155,6 +157,18 @@ class InvoiceController extends Controller
             ]);
         }
 
+        // Create payment record
+        $paid = max(0, $request->input('paid', 0));
+
+        Payment::create([
+            'invoice_id' => $invoice->id,
+            'paid' => $paid,
+        ]);
+
+
+
+
+        // Send email to client
         Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
 
         // Log the action
@@ -331,21 +345,62 @@ class InvoiceController extends Controller
         return response()->json(['success' => true, 'message' => 'Invoice Deleted Successfully'], 200);
     }
 
-    public function addinvoiceAjax(Request $request)
+    public function addClientAjax(Request $request)
     {
-        $request->validate([
-            'invoice_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:invoices,email',
+         $request->validate([
+            'client_name' => 'required|string|max:255|unique:clients,name',
+            'email' => 'required|email|unique:clients,email',
         ]);
 
-        $invoice = invoice::create([
-            'name' => $request->invoice_name,
+        $client = Client::create([
+            'name' => $request->client_name,
             'email' => $request->email
         ]);
 
         return response()->json([
             'success' => true,
-            'invoice' => $invoice,
+            'client' => $client,
         ]);
+    }
+
+    public function payment($id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $payments = Payment::where('invoice_id', $id)->latest()->get();
+        return view('invoice.payment', [
+            'invoice' => $invoice,
+            'payments' => $payments
+        ]);
+    }
+
+    public function payment_store(Request $request, $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $invoice = Invoice::findOrFail($id);
+
+        $due = $invoice->total - $invoice->payment()->sum('amount');
+
+        // Check if the payment amount exceeds the due amount
+        if ($request->amount > $due) {
+            return redirect()->back()->with(['error' => 'Payment amount cannot exceed the due amount of ' . $due]);
+        }
+
+
+
+        // Create a new payment record
+        Payment::create([
+            'invoice_id' => $invoice->id,
+            'amount' => $request->amount,
+            'payment_method'=> $request->paymentMethod,
+        ]);
+
+        // Log the action
+        userLog('Invoice Payment', 'Added a Payment for Invoice - #' . $invoice->invoice_number);
+
+        return redirect()->route('invoice.payment', $id)->with('success', 'Payment added successfully!');
     }
 }

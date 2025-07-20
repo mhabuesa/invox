@@ -83,6 +83,9 @@ Route::middleware('auth')->group(function () {
     });
     Route::controller(InvoiceController::class)->name('invoice.')->prefix('invoice')->group(function () {
         Route::post('/addClientAjax', 'addClientAjax')->name('addClientAjax');
+        Route::get('/payment/{id}', 'payment')->name('payment');
+        Route::post('/payment/store/{id}', 'payment_store')->name('payment.store');
+
     });
     Route::controller(TaxController::class)->name('tax.')->prefix('tax')->group(function () {
         Route::post('/status/update/{id}', 'status_update')->name('status.update');

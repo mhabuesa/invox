@@ -217,7 +217,7 @@
                                         </div>
                                         <div class="mb-3 d-flex justify-content-between">
                                             <strong>Paid :</strong>
-                                            <strong class="justify-content-end d-flex"><input type="text" name="paid" id="paid" class="form-control w-50"></strong>
+                                            <strong class="justify-content-end d-flex"><input type="number" class="form-control w-75" name="paid" id="paid" placeholder="0.00" min="0"></strong>
                                         </div>
                                         <div class="mb-3 d-flex justify-content-between">
                                             <strong>Due :</strong>
