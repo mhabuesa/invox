@@ -100,7 +100,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                     @forelse ($latestInvoices as $invoice)
+                                    @forelse ($latestInvoices as $invoice)
                                         <tr>
                                             <td>{{ $invoice->invoice_number }}</td>
                                             <td>{{ $invoice->client->name ?? 'N/A' }}</td>
@@ -173,4 +173,58 @@
 
     </section>
     <!-- /.content -->
+
+    <div class="col-md-12">
+        <div class="card shadow mb-4 h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Payment Overview</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="invoiceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+@push('footer')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('invoiceChart').getContext('2d');
+        const invoiceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($months) !!},
+                datasets: [{
+                        label: 'Paid Amount',
+                        data: {!! json_encode($paidData) !!},
+                        backgroundColor: 'rgba(78, 115, 223, 0.7)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Due Amount',
+                        data: {!! json_encode($dueData) !!},
+                        backgroundColor: 'rgba(231, 74, 59, 0.7)',
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        console.log(document.getElementById('invoiceChart'));
+    </script>
+@endpush

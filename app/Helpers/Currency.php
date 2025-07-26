@@ -11,6 +11,6 @@ if (!function_exists('currency')) {
             return $symbol;
         }
 
-        return $symbol . number_format($amount);
+        return $symbol . $amount;
     }
 }

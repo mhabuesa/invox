@@ -89,6 +89,11 @@
                                             <input type="number" class="form-control" id="amount" placeholder="0.00"
                                                 step="0.01" min="0" required name="amount">
                                         </div>
+                                        @if (session('error'))
+                                            <div class="text-danger font-weight-bold">
+                                                {{ session('error') }}
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div class="mb-3">

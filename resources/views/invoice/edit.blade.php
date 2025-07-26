@@ -222,6 +222,16 @@
                                             <strong>Total :</strong>
                                             <strong><span id="grandTotal">0.00</span></strong>
                                         </div>
+                                        <div class="mb-3 d-flex justify-content-between">
+                                            <strong>Paid :</strong>
+                                            <strong class="justify-content-end d-flex">
+                                                <input type="number" class="form-control w-75" id="paid" placeholder="0.00" min="0" value="{{$invoiceData->payment->sum('amount')}}" readonly>
+                                            </strong>
+                                        </div>
+                                        <div class="mb-3 d-flex justify-content-between">
+                                            <strong>Due :</strong>
+                                            <strong><span id="due">0.00</span></strong>
+                                        </div>
                                     </div>
 
                                 </div>

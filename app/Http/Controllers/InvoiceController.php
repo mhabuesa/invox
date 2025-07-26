@@ -4,14 +4,14 @@ namespace App\Http\Controllers;
 
 use Mpdf\Mpdf;
 use App\Models\Tax;
-use App\Models\invoice;
+use App\Models\Client;
+use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Mail\InvoiceMail;
-use App\Models\Client;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 use App\Models\InvoiceSetting;
-use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
