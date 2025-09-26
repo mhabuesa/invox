@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Application;
 use App\Http\Middleware\InstallationCheck;
+use App\Http\Middleware\DemoUserRestriction;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,8 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'demo.restrict' => DemoUserRestriction::class,
         ]);
-        
+
         // InstallationCheck middleware globally attach
         $middleware->append(InstallationCheck::class);
     })

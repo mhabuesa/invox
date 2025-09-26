@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // Auth Middleware Group
-Route::middleware('auth')->group(function () {
+Route::middleware('auth','demo.restrict')->group(function () {
 
     //Dashboard Controller Group
     Route::controller(DashboardController::class)->group(function () {
