@@ -162,7 +162,7 @@ class InvoiceController extends Controller
 
         Payment::create([
             'invoice_id' => $invoice->id,
-            'paid' => $paid,
+            'amount' => $paid,
         ]);
 
 

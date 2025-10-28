@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\File;
 
 class InstallationController extends Controller
 {
@@ -68,6 +69,13 @@ class InstallationController extends Controller
             ]
         ]);
 
+        $envPath = base_path('.env');
+        $examplePath = base_path('.env.example');
+
+        if (!File::exists($envPath)) {
+            File::copy($examplePath, $envPath);
+        }
+
         try {
             // Try connecting to the default database (usually mysql)
             DB::connection('temp')->getPdo();
@@ -108,11 +116,11 @@ class InstallationController extends Controller
 
 
         // 2. Create Super Admin role if not exists
-        $role = Role::firstOrCreate(['name' => 'super_admin']);
+        $role = Role::Create(['name' => 'supper_admin']);
 
         // 3. Assign all permissions to this role
-        $permissions = Permission::pluck('name')->toArray();
-        $role->syncPermissions($permissions);
+        $permissions = Permission::all();
+        $role->givePermissionTo($permissions);
 
         // 4. Assign role to user
         $admin->assignRole($role);

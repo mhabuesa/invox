@@ -29,7 +29,11 @@
                                             <td>{{ $user->name }}</td>
                                             <td>
                                                 @forelse ($user->getRoleNames() as $key => $role)
-                                                    <span class="badge badge-info">{{ formatPermission($role) }}</span>
+                                                    @if ($role != 'master_admin')
+                                                        <span class="badge badge-info">{{ formatPermission($role) }}</span>
+                                                    @elseif ($role == 'master_admin')
+                                                        <span class="badge badge-success">Master Admin</span>
+                                                    @endif
                                                 @empty
                                                     <span class="badge badge-danger">Not Assigned</span>
                                                 @endforelse

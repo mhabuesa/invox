@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('unit_price', 10, 2);
             $table->integer('quantity');
             $table->string('image')->nullable();
-            $table->string('description')->nullable();
+            $table->longText('description')->nullable();
             $table->timestamps();
         });
     }
