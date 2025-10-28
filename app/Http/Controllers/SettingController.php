@@ -211,28 +211,29 @@ class SettingController extends Controller
         $authorized_status = $request->authorized_status ? 1 : 0;
         $terms_status = $request->terms_status ? 1 : 0;
 
-
         if ($request->hasFile('signature')) {
-            if ($previous_info->signature != null) {
-                // Delete old signature if exists
+            // only delete if previous exists
+            if ($previous_info && $previous_info->signature != null) {
                 $this->deleteImage('invoice_setting', $previous_info->signature);
             }
             $signature_name = $this->saveImage('invoice_setting', $request->file('signature'));
         }
 
         InvoiceSetting::updateOrCreate(
-            ['id' => 1], // where condition
+            ['id' => 1],
             [
                 'name' => $request->name,
                 'designation' => $request->designation,
-                'signature' => $signature_name ?? $previous_info->signature ?? null,
+                'signature' => $signature_name ?? ($previous_info->signature ?? null),
                 'authorized_status' => $authorized_status,
                 'terms' => $request->terms,
                 'terms_status' => $terms_status,
             ]
         );
+
         return redirect()->route('setting.invoice')->with('success', 'Invoice Setting Updated Successfully');
     }
+
 
     public function remove_signature()
     {
