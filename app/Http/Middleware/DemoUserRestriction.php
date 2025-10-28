@@ -12,7 +12,7 @@ class DemoUserRestriction
     {
         $user = Auth::user();
 
-        if ($user && $user->email === 'demo@invox.com') {
+        if ($user && $user->email === 'demo@codehntr.com') {
             if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
 
                 if ($request->expectsJson()) {
