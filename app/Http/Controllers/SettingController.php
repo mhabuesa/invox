@@ -88,6 +88,7 @@ class SettingController extends Controller
             SettingsHelper::setEnvironmentValue('APP_DEBUG', $request->debug_mode);
             SettingsHelper::setEnvironmentValue('APP_URL', $request->app_url);
             SettingsHelper::setEnvironmentValue('MAIL_USERNAME', $request->email_userName);
+            SettingsHelper::setEnvironmentValue('MAIL_FROM_ADDRESS', $request->email_userName);
             SettingsHelper::setEnvironmentValue('MAIL_PASSWORD', $request->app_password);
 
 
@@ -100,8 +101,7 @@ class SettingController extends Controller
     public function setting_reload()
     {
         // Clear cache and config
-        Artisan::call('config:cache');
-        Artisan::call('cache:clear');
+        Artisan::call('optimize:clear');
 
         return redirect()->route('setting.index')->with('success', 'Settings Updated Successfully');
     }

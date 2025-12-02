@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Mail\InvoiceMail;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
+use App\Jobs\SendInvoiceMail;
 use App\Models\InvoiceSetting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -155,21 +156,24 @@ class InvoiceController extends Controller
                 'tax_id' => $request->tax_id[$key],
                 'tax' => ($line_total * ($tax ?? 0)) / 100,
             ]);
+
+            // Update product quantity
+            Product::where('id', $product_id)->decrement('quantity', $qty);
         }
 
         // Create payment record
         $paid = max(0, $request->input('paid', 0));
-
-        Payment::create([
-            'invoice_id' => $invoice->id,
-            'amount' => $paid,
-        ]);
-
-
+        if ($paid > 0) {
+            Payment::create([
+                'invoice_id' => $invoice->id,
+                'amount' => $paid,
+                'payment_method' => 'Cash',
+            ]);
+        }
 
 
         // Send email to client
-        Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
+        SendInvoiceMail::dispatch($invoice)->delay(now()->addSeconds(5));
 
         // Log the action
         userLog('Invoice Create', 'Created a New Invoice - #' . $request->invoice_number);
@@ -200,7 +204,6 @@ class InvoiceController extends Controller
     public function edit(string $id)
     {
         $invoices = invoice::all();
-        $invoice_number = 'QUT' . rand(1000, 9999);
         $products = Product::all();
         $taxes = Tax::all();
         $invoiceData = Invoice::findOrFail($id);
@@ -209,7 +212,6 @@ class InvoiceController extends Controller
         $invoiceProducts = InvoiceItem::where('invoice_id', $id)->get();
         return view('invoice.edit', [
             'invoices' => $invoices,
-            // 'invoice_number' => $invoice_number,
             'products' => $products,
             'taxes' => $taxes,
             'invoiceData' => $invoiceData,
@@ -224,7 +226,6 @@ class InvoiceController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'invoice_id' => 'required',
             'invoice_number' => 'required|unique:invoices,invoice_number,' . $id,
             'invoice_date' => 'required',
             'product_id' => 'required|array',
@@ -275,7 +276,7 @@ class InvoiceController extends Controller
         // Update main Invoice record to database
         $invoice = Invoice::findOrFail($id);
         $invoice->update([
-            'invoice_id' => $request->invoice_id,
+            // 'invoice_id' => $request->invoice_id,
             'invoice_number' => $request->invoice_number,
             'invoice_date' => $request->invoice_date,
             'discount_timing' => $discount_timing,
@@ -347,7 +348,7 @@ class InvoiceController extends Controller
 
     public function addClientAjax(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'client_name' => 'required|string|max:255|unique:clients,name',
             'email' => 'required|email|unique:clients,email',
         ]);
@@ -395,7 +396,7 @@ class InvoiceController extends Controller
         Payment::create([
             'invoice_id' => $invoice->id,
             'amount' => $request->amount,
-            'payment_method'=> $request->paymentMethod,
+            'payment_method' => $request->paymentMethod,
         ]);
 
         // Log the action

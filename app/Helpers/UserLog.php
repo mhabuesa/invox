@@ -16,10 +16,5 @@ if (!function_exists('userLog')) {
                 'description' => $description,
             ]);
         }
-
-        if (now()->isSameDay(now()->startOfMonth())) {
-            UserLog::where('created_at', '<', now()->subMonth())->delete();
-            Log::info("✅ Monthly Log Cleanup: Old logs deleted on " . now()->toDateString());
-        }
     }
 }

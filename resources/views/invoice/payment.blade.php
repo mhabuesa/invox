@@ -6,7 +6,7 @@
         <div class="col-lg-12">
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
                 <h1 class="h3 mb-0 text-gray-800">Invoice Payment</h1>
-                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <a href="{{ route('invoice.show', $invoice->invoice_number) }}" target="_blank" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                     <i class="fas fa-file-invoice mr-2 text-white-50"></i>Invoice
                 </a>
             </div>

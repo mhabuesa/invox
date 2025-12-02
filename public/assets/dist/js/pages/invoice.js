@@ -216,10 +216,14 @@ $(document).ready(function () {
             .remove();
         newCard.find(".qty").val(1);
         newCard.find(".unit_price").val(0);
-        newCard.find(".tax").val(0);
+
+        // 🚀 DEFAULT TAX SELECTED রাখবে
+        newCard.find(".tax").find("option[selected]").prop("selected", true);
+
         newCard.find(".total").text("0.00");
 
         $("#rowContainer").append(newCard);
+
         originalCard.find(".product_id", ".tax").select2();
         newCard.find(".product_id", ".tax").select2();
 

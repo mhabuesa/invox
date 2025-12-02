@@ -2,7 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SendBackupMail;
 use Illuminate\Console\Command;
+use Symfony\Component\Mime\Email;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+
+use function Illuminate\Log\log;
 
 class BackupDatabase extends Command
 {
@@ -20,28 +28,52 @@ class BackupDatabase extends Command
 
     public function handle()
     {
-        $db = env('DB_DATABASE');
-        $user = env('DB_USERNAME');
-        $pass = env('DB_PASSWORD');
-        $host = env('DB_HOST');
-        $port = env('DB_PORT', 3306);
-        $filename = 'backup-' . now()->format('Y-m-d_H-i-s') . '.sql';
-        $path = storage_path('app/backups');
+        $this->info("Starting database backup...");
 
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
+        $database = config('database.connections.mysql.database');
+        $backupName = $database . '_' . now()->format('Y-m-d_H-i-s') . '.sql';
+        $backupFolder = 'backups';
+        $backupPath = $backupFolder . '/' . $backupName;
+
+        // Create backup folder if not exists
+        if (!Storage::exists($backupFolder)) {
+            Storage::makeDirectory($backupFolder);
         }
 
-        $command = "mysqldump --user={$user} --password=\"{$pass}\" --host={$host} --port={$port} {$db} > {$path}/{$filename}";
-
-        $return = null;
-        $output = null;
-        exec($command, $output, $return);
-
-        if ($return === 0) {
-            $this->info("Database backup completed: {$filename}");
-        } else {
-            $this->error("Database backup failed.");
+        // Delete old backups
+        foreach (Storage::files($backupFolder) as $file) {
+            Storage::delete($file);
+            $this->info("Old backup deleted: $file");
         }
+
+        // Generate SQL dump
+        $sqlDump = '';
+        $tables = DB::select('SHOW TABLES');
+
+        foreach ($tables as $table) {
+            $tableName = array_values((array)$table)[0];
+
+            // Table drop statement
+            $sqlDump .= "DROP TABLE IF EXISTS `$tableName`;\n";
+
+            // Table structure
+            $createTable = DB::select("SHOW CREATE TABLE `$tableName`")[0]->{'Create Table'};
+            $sqlDump .= $createTable . ";\n\n";
+
+            // Table data
+            $rows = DB::table($tableName)->get();
+            foreach ($rows as $row) {
+                $rowData = array_map(fn($value) => addslashes($value), (array)$row);
+                $sqlDump .= "INSERT INTO `$tableName` VALUES ('" . implode("','", $rowData) . "');\n";
+            }
+
+            $sqlDump .= "\n\n";
+        }
+
+        // Save SQL file locally
+        Storage::disk('local')->put($backupPath, $sqlDump);
+        $fullPath = storage_path('app/' . $backupPath);
+        $this->info("Backup created: $fullPath");
+
     }
 }

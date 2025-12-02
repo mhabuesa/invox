@@ -17,10 +17,43 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">User Activity Log</h3>
+                            <div class="float-right d-flex align-items-center p-2 rounded">
+                                {{-- <select name="data" id="" class="form-control">
+                                                <option value="7">Last 7 Days</option>
+                                                <option value="15">Last 15 Days</option>
+                                                <option value="30">Last 30 Days</option>
+                                                <option value="all">All</option>
+                                            </select> --}}
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-danger dropdown-toggle dropdown-icon"
+                                        data-toggle="dropdown" aria-expanded="false">
+                                        <span class="">Log Delete</span>
+                                    </button>
+                                    <div class="dropdown-menu" role="menu" style="">
+                                        <a class="dropdown-item btn mt-1 btn btn-sm" href="#"
+                                            onclick="deleteActivity(this)" data-id="1">
+                                            <i class="fas fa-trash text-danger mr-1"></i> Older Than 7 Days
+                                        </a>
+                                        <a class="dropdown-item btn mt-1 btn btn-sm" href="#"
+                                            onclick="deleteActivity(this)" data-id="2">
+                                            <i class="fas fa-trash text-danger mr-1"></i> Older Than 15 Days
+                                        </a>
+                                        <a class="dropdown-item btn mt-1 btn btn-sm" href="#"
+                                            onclick="deleteActivity(this)" data-id="3">
+                                            <i class="fas fa-trash text-danger mr-1"></i> Older Than 30 Days
+                                        </a>
+                                        <a class="dropdown-item btn mt-1 btn btn-sm" href="#"
+                                            onclick="deleteActivity(this)" data-id="4">
+                                            <i class="fas fa-trash text-danger mr-1"></i> All Logs
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
-                            <table id="categoryTable" class="table table-bordered table-striped">
+                            <table id="activityTable" class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>SL</th>
@@ -80,20 +113,34 @@
     <script>
         // DataTable Script
         $(function() {
-            $("#categoryTable").DataTable({
+            $("#activityTable").DataTable({
                 "responsive": true,
                 "lengthChange": false,
                 "autoWidth": false,
                 "buttons": ["copy", "csv", "excel", "pdf", "print"]
-            }).buttons().container().appendTo('#categoryTable_wrapper .col-md-6:eq(0)');
+            }).buttons().container().appendTo('#activityTable_wrapper .col-md-6:eq(0)');
         });
 
-        // Delete Category Confirmation alart
-        function deleteCategory(button) {
+        // Delete Activity Log Confirmation alart
+        function deleteActivity(button) {
             const id = $(button).data('id');
+
+            let text = "";
+            if (id == 1) {
+                text = "7";
+            } else if (id == 2) {
+                text = "15";
+            } else if (id == 3) {
+                text = "30";
+            } else if (id == 4) {
+                text = "all ";
+            }
+
             Swal.fire({
                 title: "Are you sure?",
-                text: "You won't be able to revert this!",
+                text: id == 4 ?
+                    "This action cannot be undone." :
+                    "Logs older than " + text + " days will be permanently deleted.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -102,27 +149,19 @@
             }).then((result) => {
                 if (result.isConfirmed) {
 
-                    let url = "{{ route('category.destroy', ':id') }}";
+                    let url = "{{ route('activityLog.delete', ':id') }}";
                     url = url.replace(':id', id);
-                    let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                     $.ajax({
                         url: url,
-                        type: 'DELETE',
+                        type: 'GET',
                         dataType: 'json',
-                        headers: {
-                            'X-CSRF-TOKEN': token
-                        },
                         success: function(data) {
-                            if (data.success) {
-                                showToast(data.message, "success");
-                                $(button).closest('tr').remove();
-                            } else {
-                                showToast(data.message, "error");
-                            }
+                            showToast(data.message, "success");
+                            location.reload();
                         },
                         error: function(xhr) {
-                            showToast("An error occurred: " + xhr.responseJSON.message, "error");
+                            showToast("An error occurred!", "error");
                         }
                     });
 

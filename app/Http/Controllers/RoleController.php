@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
@@ -73,6 +74,9 @@ class RoleController extends Controller
 
     public function role_delete($id)
     {
+        if(Auth::user()->email == 'demo@invox.com'){
+            return redirect()->back()->with('error', 'Demo user can not perform this action.');
+        }
         $role = Role::findOrFail($id);
         DB::table('role_has_permissions')->where('role_id', $id)->delete(); // Remove Permission from role
         $role->delete(); // Delete the role
@@ -88,6 +92,9 @@ class RoleController extends Controller
 
     public function user_role_delete($id)
     {
+        if(Auth::user()->email == 'demo@invox.com'){
+            return redirect()->back()->with('error', 'Demo user can not perform this action.');
+        }
         $user = User::findOrFail($id);
         DB::table('model_has_roles')->where('model_id', $id)->delete(); // Remove role from user
         return redirect()->route('role.index')->with('success', 'User role deleted successfully.');

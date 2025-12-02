@@ -30,6 +30,7 @@ Route::middleware('auth','demo.restrict')->group(function () {
     Route::controller(CommonController::class)->group(function () {
         Route::get('/dbBackup', 'dbBackup')->name('dbBackup');
         Route::get('/activityLog', 'activityLog')->name('activityLog');
+        Route::get('/activityLog/delete/{id}', 'activityLog_delete')->name('activityLog.delete');
     });
 
     // Profile Controller Group

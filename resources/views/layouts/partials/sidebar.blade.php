@@ -16,7 +16,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{ route('index') }}" class="brand-link">
-        <img src="{{ asset($setting->logo ?? '/assets/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3"
+        <img src="{{ asset($setting->logo ?? '/assets/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image"
                 style="opacity: .8">
         <span class="brand-text font-weight-light">{{ $setting->app_name ?? config('app.name') }}</span>
     </a>

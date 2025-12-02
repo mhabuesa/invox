@@ -28,11 +28,10 @@ class EnvatoHelper
         }
 
         // Production: real API call
-        $token = env('ENVATO_PERSONAL_TOKEN');
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-            'User-Agent' => 'LaravelApp'
-        ])->get("https://api.envato.com/v3/market/author/sale", [
+            'Authorization' => 'Bearer ' . env('ENVATO_API_TOKEN'),
+            'User-Agent' => env('APP_NAME') . ' License Validator'
+        ])->get('https://api.envato.com/v3/market/buyer/purchase', [
             'code' => $purchaseCode
         ]);
 
