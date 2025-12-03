@@ -38,7 +38,7 @@ class ProfileController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-
+        // if user uploads an image
         if ($request->hasFile('image')) {
             // Delete old image if exists
             if (!empty($user->image)) {

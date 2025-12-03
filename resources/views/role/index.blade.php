@@ -30,7 +30,7 @@
                                             <td>
                                                 @forelse ($user->getRoleNames() as $key => $role)
                                                     @if ($role != 'master_admin')
-                                                        <span class="badge badge-info">{{ formatPermission($role) }}</span>
+                                                        <span class="badge badge-info">{{ $role }}</span>
                                                     @elseif ($role == 'master_admin')
                                                         <span class="badge badge-success">Master Admin</span>
                                                     @endif
@@ -75,11 +75,9 @@
                                     @foreach ($roles as $key => $role)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
-                                            <td>{{ formatPermission($role->name) }}</td>
+                                            <td>{{ $role->name }}</td>
                                             <td>
-                                                @if ($role->name == 'super_admin')
-                                                    <span class="badge badge-success">No Permission Required</span>
-                                                @elseif ($role->permissions->count() > 0)
+                                                @if ($role->permissions->count() > 0)
                                                     @foreach ($role->permissions as $permission)
                                                         <span
                                                             class="badge badge-info">{{ formatPermission($permission->name) }}</span>

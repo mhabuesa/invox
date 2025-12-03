@@ -45,18 +45,15 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $invoices = invoice::all();
-        // $invoice_number = rand(100000, 999999);
-
+        // Get the latest invoice number
         $latestInvoice = Invoice::orderBy('id', 'desc')->first();
+        // Generate the next invoice number
         $invoice_number = $latestInvoice ? intval($latestInvoice->invoice_number) + 1 : 1001;
+        
         $clients = Client::all();
-
-
         $products = Product::all();
         $taxes = Tax::all();
         return view('invoice.create', [
-            'invoices' => $invoices,
             'invoice_number' => $invoice_number,
             'products' => $products,
             'taxes' => $taxes,

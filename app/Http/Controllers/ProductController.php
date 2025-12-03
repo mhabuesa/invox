@@ -57,6 +57,7 @@ class ProductController extends Controller
             'unit_price' => 'required',
         ]);
 
+        // if user uploads an image save it and get the image name
         if ($request->hasFile('image')) {
             $image_name = $this->saveImage('product', $request->file('image'), 400, 400);
         }
@@ -113,8 +114,13 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
 
+        // if user uploads an image
         if ($request->hasFile('image')) {
-            $this->deleteImage('product', $product->image);
+            // Delete old image if exists
+            if ($product->image) {
+                $this->deleteImage('product', $product->image);
+            }
+            // Save new image and get image name
             $image_name = $this->saveImage('product', $request->file('image'), 400, 400);
         }
 

@@ -48,6 +48,7 @@ class TaxController extends Controller
             'value' => 'required',
         ]);
 
+        // Create Tax
         Tax::create([
             'name' => $request->name,
             'value' => $request->value,

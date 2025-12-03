@@ -41,9 +41,12 @@
                                         <label for="client">Client <span class="text-danger">*</span></label>
                                         <div class="input-group mb-3">
                                             <select class="form-control select2" name="client_id" id="client" required>
-                                                @foreach ($clients as $client)
+                                                <option value="">Select Client</option>
+                                                @forelse ($clients as $client)
                                                     <option value="{{ $client->id }}">{{ $client->name }}</option>
-                                                @endforeach
+                                                @empty
+                                                    <option value="" disabled >No Client Found</option>
+                                                @endforelse
                                             </select>
                                             <div class="input-group-append">
                                                 <div class="input-group-text" data-toggle="modal"
@@ -101,11 +104,13 @@
                                                         <select class="form-control select2 product_id" name="product_id[]"
                                                             required>
                                                             <option value="">Select Product</option>
-                                                            @foreach ($products as $product)
+                                                            @forelse ($products as $product)
                                                                 <option value="{{ $product->id }}"
                                                                     data-unit_price="{{ $product->unit_price }}">
                                                                     {{ $product->name }}</option>
-                                                            @endforeach
+                                                            @empty
+                                                                <option value="" disabled>No Product Found</option>
+                                                            @endforelse
                                                         </select>
                                                     </div>
                                                 </div>
@@ -127,11 +132,13 @@
                                                     <div class="input-group mb-3">
                                                         <select class="form-control tax" id="tax" name="tax_id[]" required>
                                                             <option value="">Select Tax</option>
-                                                            @foreach ($taxes as $tax)
+                                                            @forelse ($taxes as $tax)
                                                                 <option {{ $tax->status == 1 ? 'selected' : '' }}
                                                                     value="{{ $tax->id }}" data-tax="{{ $tax->value }}">{{ $tax->name }}
                                                                 </option>
-                                                            @endforeach
+                                                            @empty
+                                                                <option value="" disabled>No Tax Found</option>
+                                                            @endforelse
                                                         </select>
                                                     </div>
                                                 </div>

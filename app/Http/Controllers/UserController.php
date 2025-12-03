@@ -52,6 +52,7 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
+        // Create User
         User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -85,27 +86,28 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-        ]);
-
         $user = User::findOrFail($id);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-        ];
+        $request->validate([
+            'name'   => ['required', 'max:255'],
+            'email'  => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'password' => ['nullable', 'min:6'],
+        ]);
 
-        // Update user password if password is filled
+        // Prepare update data
+        $data = $request->only(['name', 'email']);
+
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);
 
-        return Redirect::route('user.index')->with('success', 'User Updated Successfully');
+        return redirect()
+            ->route('user.index')
+            ->with('success', 'User Updated Successfully');
     }
+
 
 
     /**

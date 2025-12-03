@@ -30,6 +30,7 @@ class RoleController extends Controller
         $request->validate([
             'permission_name' => 'required|string|max:255|unique:permissions,name',
         ]);
+        // Create Permission
         Permission::create(['name' => $request->permission_name]);
         return redirect()->route('role.index')->with('success', 'Permission created successfully.');
     }
@@ -40,7 +41,7 @@ class RoleController extends Controller
             'role_name' => 'required|string|max:255|unique:roles,name',
             'permission' => 'required',
         ]);
-
+        // Create Role and assign permission
         $role = Role::create(['name' => $request->role_name]);
         $permission = Permission::findOrFail($request->permission);
         $role->givePermissionTo($permission);
@@ -62,6 +63,7 @@ class RoleController extends Controller
             'permissions' => 'required|array',
         ]);
 
+        // Update Role
         $role = Role::findOrFail($id);
         $role->name = $request->role;
         $role->save();
@@ -74,11 +76,13 @@ class RoleController extends Controller
 
     public function role_delete($id)
     {
+        // Demo user can not perform this action
         if(Auth::user()->email == 'demo@invox.com'){
             return redirect()->back()->with('error', 'Demo user can not perform this action.');
         }
         $role = Role::findOrFail($id);
-        DB::table('role_has_permissions')->where('role_id', $id)->delete(); // Remove Permission from role
+        // Remove Permission from role
+        DB::table('role_has_permissions')->where('role_id', $id)->delete();
         $role->delete(); // Delete the role
         return redirect()->route('role.index')->with('success', 'Permission deleted successfully.');
     }
@@ -86,17 +90,19 @@ class RoleController extends Controller
     public function role_assign(Request $request)
     {
         $user = User::findOrFail($request->user_id);
+        // Assign Role to User
         $user->assignRole($request->role);
         return redirect()->route('role.index')->with('success', 'Role assigned successfully.');
     }
 
     public function user_role_delete($id)
     {
+        // Demo user can not perform this action
         if(Auth::user()->email == 'demo@invox.com'){
             return redirect()->back()->with('error', 'Demo user can not perform this action.');
         }
-        $user = User::findOrFail($id);
-        DB::table('model_has_roles')->where('model_id', $id)->delete(); // Remove role from user
+        // Remove Role from user
+        DB::table('model_has_roles')->where('model_id', $id)->delete();
         return redirect()->route('role.index')->with('success', 'User role deleted successfully.');
     }
 }

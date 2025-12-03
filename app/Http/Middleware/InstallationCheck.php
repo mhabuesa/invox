@@ -16,7 +16,7 @@ class InstallationCheck
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $installed = file_exists(storage_path('installed'));
+        $installed = file_exists(storage_path('installed.txt'));
 
         if (!$installed && !$request->is('install*') && !$request->expectsJson()) {
             return redirect('/install');

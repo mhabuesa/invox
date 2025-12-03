@@ -12,6 +12,7 @@ use App\Mail\InvoiceMail;
 use App\Models\QuoteItem;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
+use App\Jobs\SendInvoiceMail;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
@@ -53,7 +54,6 @@ class QuoteController extends Controller
         $clients = Client::all();
         $categories = Category::all();
         $quote_number = rand(1000, 9999);
-
         $products = Product::all();
         $taxes = Tax::all();
         return view('quote.create', [
@@ -184,7 +184,6 @@ class QuoteController extends Controller
         $products = Product::all();
         $taxes = Tax::all();
         $quoteData = Quote::findOrFail($id);
-
         $quoteProducts = QuoteItem::where('quote_id', $id)->get();
         return view('quote.edit', [
             'clients' => $clients,
@@ -343,11 +342,14 @@ class QuoteController extends Controller
 
     public function convertToInvoice($id)
     {
-        $quote = Quote::findOrFail($id);
 
+        $quote = Quote::findOrFail($id);
+        // Get the latest invoice number
         $latestInvoice = Invoice::orderBy('id', 'desc')->first();
+        // Generate new invoice number
         $invoice_number = $latestInvoice ? intval($latestInvoice->invoice_number) + 1 : 1001;
 
+        // Create new invoice from quote data
         $invoice = Invoice::create([
             'client_id' => $quote->client_id,
             'invoice_number' => $invoice_number,
@@ -361,8 +363,8 @@ class QuoteController extends Controller
             'tax' => $quote->tax,
         ]);
 
+        // Create invoice items
         $quoteItems = QuoteItem::where('quote_id', $id)->get();
-
         foreach ($quoteItems as $item) {
             InvoiceItem::create([
                 'invoice_id' => $invoice->id,
@@ -374,11 +376,11 @@ class QuoteController extends Controller
             ]);
         }
 
-        // Optionally, delete the quote after conversion
+        // Delete the quote after conversion
         $quote->delete();
 
         if ($invoice) {
-            Mail::to($invoice->client->email)->queue(new InvoiceMail($invoice));
+            SendInvoiceMail::dispatch($invoice)->delay(now()->addSeconds(5));
             return redirect()->route('invoice.show', $invoice->invoice_number)->with('success', 'Quote converted to Invoice successfully!');
         } else {
             return redirect()->back()->with('error', 'Failed to convert Quote to Invoice.');

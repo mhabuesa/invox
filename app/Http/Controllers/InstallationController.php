@@ -20,7 +20,7 @@ class InstallationController extends Controller
 {
     public function install()
     {
-        if (file_exists(storage_path('installed'))) {
+        if (file_exists(storage_path('installed.txt'))) {
             return redirect()->route('index');
         }
         // Logic for installation page
@@ -57,6 +57,7 @@ class InstallationController extends Controller
         $username = $request->db_user;
         $password = $request->db_pass;
 
+        // Create temporary connection
         config([
             'database.connections.temp' => [
                 'driver' => 'mysql',
@@ -72,25 +73,47 @@ class InstallationController extends Controller
         $envPath = base_path('.env');
         $examplePath = base_path('.env.example');
 
+        // Create .env if not exists
         if (!File::exists($envPath)) {
             File::copy($examplePath, $envPath);
         }
 
         try {
-            // Try connecting to the default database (usually mysql)
+            // Test DB connection
             DB::connection('temp')->getPdo();
 
-            // If successful, run the migrations
+            // Migrate on temp connection
             Artisan::call('migrate', [
                 '--database' => 'temp',
-                '--force' => true, // Use this in production or to skip confirmation
+                '--force' => true,
             ]);
+
+            // Save real DB credentials into .env
+            SettingsHelper::setEnvironmentValue('DB_HOST', $host);
             SettingsHelper::setEnvironmentValue('DB_DATABASE', $database);
             SettingsHelper::setEnvironmentValue('DB_USERNAME', $username);
             SettingsHelper::setEnvironmentValue('DB_PASSWORD', $password);
+
+            // Clear config cache so .env updates apply
+            Artisan::call('config:clear');
+            Artisan::call('cache:clear');
+
+            // Purge cached MySQL connection
+            DB::purge('mysql');
+
+            // Reload configuration (important)
+            config()->set('database.connections.mysql.host', $host);
+            config()->set('database.connections.mysql.database', $database);
+            config()->set('database.connections.mysql.username', $username);
+            config()->set('database.connections.mysql.password', $password);
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -98,11 +121,14 @@ class InstallationController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email', // Change 'users' if table is different
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // Save admin user
+        // Step 1: Run database seeder
+        Artisan::call('db:seed');
+
+        // Step 2: Create the initial Administrator user
         $admin = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -110,31 +136,31 @@ class InstallationController extends Controller
             'is_super_admin' => true,
         ]);
 
+        // Step 3: Save initial system email setting
         Setting::create([
             'email' => $request->email,
         ]);
 
 
-        // 2. Create Super Admin role if not exists
-        $role = Role::Create(['name' => 'supper_admin']);
+        // Step 4: Create Super Admin role
+        $role = Role::firstOrCreate(['name' => 'super_admin']);
 
-        // 3. Assign all permissions to this role
+        // Step 5: Retrieve all existing permissions from the database
         $permissions = Permission::all();
-        $role->givePermissionTo($permissions);
+        // Step 6: Sync all permissions to the 'super_admin' role.
+        $role->syncPermissions($permissions);
 
-        // 4. Assign role to user
+        // Step 7: Assign the 'super_admin' role to the newly created user
         $admin->assignRole($role);
 
-        // Write installation date to the file
-        file_put_contents(storage_path('installed'), 'Installed on: ' . now());
-
-        // Run database seeder
-        Artisan::call('db:seed');
-
-        // Clear cache and config
+        // Step 8: CACHE CLEAR AND FINALIZATION STEPS
+        // Clear general application caches (config, view) to finalize the setup environment
         Artisan::call('config:cache');
         Artisan::call('cache:clear');
         Artisan::call('view:clear');
+
+        // Mark installation as complete by creating the 'installed' file
+        file_put_contents(storage_path('installed.txt'), 'Installed on: ' . now());
 
 
 

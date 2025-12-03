@@ -124,6 +124,7 @@ class SettingController extends Controller
             'symbol' => 'required',
         ]);
 
+        // Create Currency
         Currency::create([
             'country' => $request->country,
             'currency' => $request->currency,
@@ -142,6 +143,7 @@ class SettingController extends Controller
             'symbol' => 'required',
         ]);
 
+        // Update Currency
         $currency->update([
             'country' => $request->country,
             'currency' => $request->currency,
@@ -184,7 +186,7 @@ class SettingController extends Controller
     public function currency_destroy(Currency $currency)
     {
         try {
-            // Delete Tax
+            // Delete currency
             $currency->delete();
         } catch (\Exception $e) {
             Log::error($e);
@@ -212,13 +214,15 @@ class SettingController extends Controller
         $terms_status = $request->terms_status ? 1 : 0;
 
         if ($request->hasFile('signature')) {
-            // only delete if previous exists
+            // only delete if previous signature exists
             if ($previous_info && $previous_info->signature != null) {
                 $this->deleteImage('invoice_setting', $previous_info->signature);
             }
+            // Save new signature and get image name
             $signature_name = $this->saveImage('invoice_setting', $request->file('signature'));
         }
 
+        // Update or Create Invoice Setting
         InvoiceSetting::updateOrCreate(
             ['id' => 1],
             [
